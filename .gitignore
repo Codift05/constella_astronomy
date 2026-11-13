@@ -1,0 +1,16 @@
+# Hasil build: bisa dibuat ulang, dan ukurannya ratusan megabyte.
+app/build/
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+build/
+
+# APK rilis 50 MB. Dibuat ulang lewat `flutter build apk --release`,
+# dan workflow iOS menghasilkan .ipa sebagai artifact, bukan sebagai file repo.
+dist/
+
+# Berkas lokal milik editor dan OS.
+.idea/
+.vscode/
+*.iml
+.DS_Store
