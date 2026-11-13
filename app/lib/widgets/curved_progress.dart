@@ -1,0 +1,136 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../theme/tokens.dart';
+
+/// Progress bar melengkung untuk Stardust Energy (PRD §4.4 "Status Bar":
+/// "indikator pengumpulan poin eksplorasi dengan progress bar melengkung").
+///
+/// Busur terbuka di bawah, nilai di tengah. Pergerakannya memakai spring,
+/// bukan kurva linear.
+class CurvedProgressBar extends StatelessWidget {
+  const CurvedProgressBar({
+    super.key,
+    required this.value,
+    required this.label,
+    this.caption,
+    this.size = 180,
+  });
+
+  /// 0.0 sampai 1.0.
+  final double value;
+
+  /// Teks besar di tengah busur.
+  final String label;
+  final String? caption;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: value.clamp(0.0, 1.0)),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.elasticOut,
+      builder: (context, t, _) => SizedBox(
+        width: size,
+        height: size * 0.72,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            painter: _ArcPainter(
+              t,
+              track: p.controlSurface,
+              gradientStart: p.accentPrimary,
+              gradientEnd: p.accentStrong,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label, style: p.numeral.copyWith(fontSize: 40)),
+                  if (caption != null) ...[
+                    const SizedBox(height: AppSpace.xs),
+                    Text(
+                      caption!,
+                      textAlign: TextAlign.center,
+                      style: p.caption,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ArcPainter extends CustomPainter {
+  const _ArcPainter(
+    this.value, {
+    required this.track,
+    required this.gradientStart,
+    required this.gradientEnd,
+  });
+
+  final double value;
+
+  /// Painter tidak bisa membaca [BuildContext], jadi warna palet diteruskan
+  /// lewat konstruktor dan dibandingkan di [shouldRepaint].
+  final Color track;
+  final Color gradientStart;
+  final Color gradientEnd;
+
+  /// Busur membentang 240 derajat, terbuka di bawah.
+  static const _start = math.pi * 0.75;
+  static const _sweep = math.pi * 1.5;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const stroke = 12.0;
+    final rect = Rect.fromLTWH(
+      stroke / 2,
+      stroke / 2,
+      size.width - stroke,
+      size.width - stroke,
+    );
+
+    canvas.drawArc(
+      rect,
+      _start,
+      _sweep,
+      false,
+      Paint()
+        ..color = track
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke,
+    );
+
+    if (value <= 0) return;
+    canvas.drawArc(
+      rect,
+      _start,
+      _sweep * value,
+      false,
+      Paint()
+        ..shader = SweepGradient(
+          startAngle: _start,
+          endAngle: _start + _sweep,
+          colors: [gradientStart, gradientEnd],
+        ).createShader(rect)
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ArcPainter oldDelegate) =>
+      oldDelegate.value != value ||
+      oldDelegate.track != track ||
+      oldDelegate.gradientStart != gradientStart ||
+      oldDelegate.gradientEnd != gradientEnd;
+}
