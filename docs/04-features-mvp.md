@@ -43,3 +43,42 @@ Acceptance criteria diturunkan dari mekanik yang ditulis di PRD asli. Baris yang
 - [ ] Rasi bintang bisa dihapus atau diberi nama ulang oleh pemiliknya. *(turunan)*
 
 ---
+
+## 4.3 Astro-Transit (Live Tracking Komet)
+
+**Deskripsi:** Mengubah pesawat atau kapal laut yang lewat menjadi objek komet atau bintang jatuh.
+
+### Mekanik & UI
+- Mengonsumsi API radar pihak ketiga berdasarkan GPS pengguna.
+- Menambahkan layer partikel 3D stardust di ekor pesawat yang terdeteksi kamera.
+- **Dynamic Island Integration:** informasi rute dan ETA dirender memanjang dari Dynamic Island (iOS) atau sebagai notifikasi pill melayang (Android).
+
+### Acceptance Criteria
+- [ ] Pesawat dalam radius tertentu dari GPS pengguna terambil dari API radar. *(turunan: radius dan interval refresh perlu ditetapkan)*
+- [ ] Ekor partikel stardust menempel pada posisi pesawat di viewport kamera.
+- [ ] Rute dan ETA tampil di Dynamic Island pada perangkat iOS yang mendukungnya.
+- [ ] Android menampilkan padanan berupa pill melayang.
+- [ ] Aplikasi tetap berfungsi tanpa crash saat API radar gagal atau tidak punya data di wilayah itu.
+- [ ] API key radar tidak pernah dikirim ke klien — semua request lewat backend Golang.
+
+---
+
+## 4.4 Gamification, Mascot & Focus Timer
+
+**Deskripsi:** Integrasi elemen produktivitas dan relaksasi bergaya soft UI.
+
+### Mekanik & UI
+- **Cosmic Mascot:** karakter pendamping 3D bergaya soft (mirip maskot Foku pada referensi) yang melayang interaktif dan memberi panduan onboarding lewat speech bubble.
+- **Focus Session Timer:** layar pengaturan sesi dengan angka besar dan opsi menit (5m, 10m, 25m) dalam bentuk chip button biru pastel, serta tombol kapsul Navy "Start focus session" untuk memulai mode Malam Kosmik.
+- **Lo-Fi Player:** pemutar audio mini di atas Home Indicator dengan instrumen ambient atau lo-fi.
+- **Status Bar:** indikator pengumpulan poin eksplorasi (Stardust Energy) dengan progress bar melengkung yang bersih.
+
+### Acceptance Criteria
+- [ ] Maskot melayang dengan animasi idle dan merespons tap.
+- [ ] Speech bubble memandu pengguna baru melewati onboarding.
+- [ ] Chip durasi (5m, 10m, 15m, 25m, 30m, 45m, 60m) bisa dipilih, dan nilai terpilih tampil sebagai angka besar.
+- [ ] Tombol "Start focus session" memulai timer dan masuk ke mode Malam Kosmik.
+- [ ] Sesi yang selesai tersimpan ke tabel `focus_sessions`.
+- [ ] Stardust Energy bertambah setelah sesi selesai, dan progress bar melengkung ikut bergerak dengan spring animation.
+- [ ] Lo-fi player bisa play, pause, dan ganti track; audio tetap jalan saat layar AR aktif. *(turunan)*
+- [ ] Timer tetap akurat saat aplikasi di background. *(turunan)*
