@@ -1,0 +1,147 @@
+{
+  "@@locale": "en",
+  "appTitle": "Constella",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "greetingNight": "Clear night",
+  "mascotSemanticLabel": "{name}, your cosmic companion",
+  "@mascotSemanticLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascotSpeechSky": "The sky is waiting.\nShall we open the portal?",
+  "mascotSpeechFocus": "I am ready to focus!\nLet's set up a timer.",
+  "enterCosmicNight": "Enter the Cosmic Night",
+  "cosmicNightHint": "Point your camera at the sky",
+  "tabSky": "Sky",
+  "tabConstellations": "Shapes",
+  "tabFocus": "Focus",
+  "back": "Back",
+  "constellationsTitle": "Your constellations",
+  "constellationsEmptyTitle": "No constellations yet",
+  "constellationsEmptyBody": "Open the Cosmic Night, then connect the city lights to draw your first shape.",
+  "arOrbHint": "Tap the orb to open the portal",
+  "arCloseP": "Close the portal",
+  "arPortalOpen": "Portal open",
+  "arCameraDenied": "Camera access is needed to open the Cosmic Night.",
+  "arCameraDeniedAction": "Open settings",
+  "arCameraUnavailable": "No camera found on this device.",
+  "arDrawHint": "Drag between the lights to draw",
+  "focusSessionTitle": "Focus Session",
+  "mascotReadyToFocus": "{name} is ready to focus with you",
+  "@mascotReadyToFocus": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "focusTime": "Focus time",
+  "minutesUnit": "minutes",
+  "decreaseDuration": "Decrease duration",
+  "increaseDuration": "Increase duration",
+  "startFocusSession": "Start focus session",
+  "pause": "Pause",
+  "resume": "Resume",
+  "giveUp": "Give up",
+  "mascotFocusing": "Shh… {name} is focusing.",
+  "@mascotFocusing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascotPaused": "Paused. Ready when you are.",
+  "sessionCompleteTitle": "Session complete",
+  "sessionCompleteBody": "{minutes} minutes of {category}. Nice work.",
+  "@sessionCompleteBody": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "stardustEarned": "+{amount} Stardust",
+  "@stardustEarned": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "done": "Done",
+  "giveUpTitle": "Give up this session?",
+  "giveUpBody": "No Stardust is awarded for an unfinished session.",
+  "giveUpConfirm": "Give up",
+  "giveUpCancel": "Keep going",
+  "arTapToAddNode": "Tap the city lights to drop nodes",
+  "arDragToConnect": "Drag between nodes to draw",
+  "constellationNameHint": "Name this shape",
+  "constellationNameExample": "City Bridge",
+  "save": "Save",
+  "undo": "Undo",
+  "constellationSaved": "\"{name}\" saved to your shapes",
+  "@constellationSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nodesAndLines": "{nodes} nodes · {lines} lines",
+  "@nodesAndLines": {
+    "placeholders": {
+      "nodes": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "stardustTitle": "Stardust Energy",
+  "stardustCaption": "{current} of {next} to the next tier",
+  "@stardustCaption": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "next": {
+        "type": "int"
+      }
+    }
+  },
+  "focusMinutesTotal": "{minutes} min focused",
+  "@focusMinutesTotal": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionRemainingLabel": "remaining",
+  "sessionCompleteBodyShort": "{minutes} minutes under the night sky.",
+  "@sessionCompleteBodyShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "constellationsCount": "{count, plural, =0{No shapes yet} =1{1 shape} other{{count} shapes}}",
+  "@constellationsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}
