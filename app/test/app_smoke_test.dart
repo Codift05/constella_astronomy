@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(_app);
     await _settle(tester);
 
-    await _openTab(tester, 'Shapes');
+    await _openTab(tester, 'Constellations');
     expect(find.text('No constellations yet'), findsOneWidget);
 
     await _openTab(tester, 'Sky');
@@ -123,6 +123,18 @@ void main() {
     expect(find.text('45'), findsOneWidget);
   });
 
+  testWidgets('Layar Langit menjelaskan untuk apa Malam Kosmik ada', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app);
+    await _settle(tester);
+
+    // Temuan audit 7: sebelumnya layar hanya memberi tahu cara memakai,
+    // tidak pernah menyebut masalah yang dipecahkan.
+    expect(find.textContaining('City lights'), findsOneWidget);
+    expect(find.textContaining('really above you'), findsOneWidget);
+  });
+
   testWidgets('Tidak ada overflow di layar sempit', (tester) async {
     tester.view.physicalSize = const Size(320, 568);
     tester.view.devicePixelRatio = 1.0;
@@ -132,7 +144,7 @@ void main() {
     await _settle(tester);
     expect(tester.takeException(), isNull);
 
-    for (final tab in ['Shapes', 'Sky']) {
+    for (final tab in ['Constellations', 'Sky']) {
       await _openTab(tester, tab);
       expect(tester.takeException(), isNull, reason: 'tab $tab');
     }
@@ -159,7 +171,7 @@ void _dynamicTypeTests() {
     await _settle(tester);
     expect(tester.takeException(), isNull, reason: 'tab Sky');
 
-    await _openTab(tester, 'Shapes');
+    await _openTab(tester, 'Constellations');
     expect(tester.takeException(), isNull, reason: 'tab Shapes');
     await _openTab(tester, 'Sky');
     await _openFocus(tester);

@@ -124,5 +124,10 @@
   "starOpenSettings": "Buka setelan",
   "starNoCompass": "Ponsel ini tidak punya kompas",
   "starNoCompassBody": "Mengenali bintang butuh magnetometer untuk tahu kamu menghadap ke mana. Perangkat ini tidak melaporkannya.",
-  "starBelowHorizon": "di bawah ufuk"
+  "starBelowHorizon": "di bawah ufuk",
+  "cosmicNightPurpose": "Lampu kota menghapus bintang. Portal ini menunjukkan langit yang sebenarnya ada di atasmu sekarang.",
+  "starCatcherPurpose": "Arahkan bidikan ke bintang mana pun. Constella mengenalinya dari posisimu dan jam di ponsel, tanpa internet.",
+  "arPortalTip": "Semua yang di atas cakrawala berubah jadi langit malam. Gedung dan tanah tetap apa adanya.",
+  "lightCaught": "Cahaya terang tertangkap",
+  "lightCaughtHint": "Ketuk untuk menaruh node di sana"
 }

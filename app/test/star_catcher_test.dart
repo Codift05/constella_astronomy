@@ -169,6 +169,10 @@ void main() {
 
     expect(find.text('Sirius'), findsNothing);
     expect(find.textContaining('No bright star'), findsOneWidget);
+    // Keadaan kosong inilah yang pertama dilihat pengguna, jadi di sinilah
+    // layar harus menjelaskan dirinya sendiri (temuan audit 8).
+    expect(find.textContaining('Aim the crosshair'), findsOneWidget);
+    expect(find.textContaining('no internet'), findsOneWidget);
   });
 
   testWidgets('pembacaan kompas menunjukkan arah mata angin', (tester) async {

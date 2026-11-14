@@ -18,7 +18,7 @@
   "enterCosmicNight": "Enter the Cosmic Night",
   "cosmicNightHint": "Point your camera at the sky",
   "tabSky": "Sky",
-  "tabConstellations": "Shapes",
+  "tabConstellations": "Constellations",
   "tabFocus": "Focus",
   "back": "Back",
   "constellationsTitle": "Your constellations",
@@ -224,5 +224,10 @@
   "starOpenSettings": "Open settings",
   "starNoCompass": "This phone has no compass",
   "starNoCompassBody": "Identifying a star needs a magnetometer to know which way you are facing. This device does not report one.",
-  "starBelowHorizon": "below the horizon"
+  "starBelowHorizon": "below the horizon",
+  "cosmicNightPurpose": "City lights wash out the stars. The portal shows the sky that is really above you right now.",
+  "starCatcherPurpose": "Aim the crosshair at any star. Constella names it from where you stand and the time on your phone, with no internet.",
+  "arPortalTip": "Everything above the horizon becomes night sky. Buildings and ground stay as they are.",
+  "lightCaught": "Bright light caught",
+  "lightCaughtHint": "Tap it to drop a node there"
 }

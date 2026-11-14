@@ -46,7 +46,7 @@ class AppL10nEn extends AppL10n {
   String get tabSky => 'Sky';
 
   @override
-  String get tabConstellations => 'Shapes';
+  String get tabConstellations => 'Constellations';
 
   @override
   String get tabFocus => 'Focus';
@@ -373,4 +373,22 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get starBelowHorizon => 'below the horizon';
+
+  @override
+  String get cosmicNightPurpose =>
+      'City lights wash out the stars. The portal shows the sky that is really above you right now.';
+
+  @override
+  String get starCatcherPurpose =>
+      'Aim the crosshair at any star. Constella names it from where you stand and the time on your phone, with no internet.';
+
+  @override
+  String get arPortalTip =>
+      'Everything above the horizon becomes night sky. Buildings and ground stay as they are.';
+
+  @override
+  String get lightCaught => 'Bright light caught';
+
+  @override
+  String get lightCaughtHint => 'Tap it to drop a node there';
 }

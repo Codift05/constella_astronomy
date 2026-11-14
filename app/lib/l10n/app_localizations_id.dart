@@ -371,4 +371,22 @@ class AppL10nId extends AppL10n {
 
   @override
   String get starBelowHorizon => 'di bawah ufuk';
+
+  @override
+  String get cosmicNightPurpose =>
+      'Lampu kota menghapus bintang. Portal ini menunjukkan langit yang sebenarnya ada di atasmu sekarang.';
+
+  @override
+  String get starCatcherPurpose =>
+      'Arahkan bidikan ke bintang mana pun. Constella mengenalinya dari posisimu dan jam di ponsel, tanpa internet.';
+
+  @override
+  String get arPortalTip =>
+      'Semua yang di atas cakrawala berubah jadi langit malam. Gedung dan tanah tetap apa adanya.';
+
+  @override
+  String get lightCaught => 'Cahaya terang tertangkap';
+
+  @override
+  String get lightCaughtHint => 'Ketuk untuk menaruh node di sana';
 }

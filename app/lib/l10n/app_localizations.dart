@@ -166,7 +166,7 @@ abstract class AppL10n {
   /// No description provided for @tabConstellations.
   ///
   /// In en, this message translates to:
-  /// **'Shapes'**
+  /// **'Constellations'**
   String get tabConstellations;
 
   /// No description provided for @tabFocus.
@@ -720,6 +720,36 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'below the horizon'**
   String get starBelowHorizon;
+
+  /// No description provided for @cosmicNightPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'City lights wash out the stars. The portal shows the sky that is really above you right now.'**
+  String get cosmicNightPurpose;
+
+  /// No description provided for @starCatcherPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Aim the crosshair at any star. Constella names it from where you stand and the time on your phone, with no internet.'**
+  String get starCatcherPurpose;
+
+  /// No description provided for @arPortalTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything above the horizon becomes night sky. Buildings and ground stay as they are.'**
+  String get arPortalTip;
+
+  /// No description provided for @lightCaught.
+  ///
+  /// In en, this message translates to:
+  /// **'Bright light caught'**
+  String get lightCaught;
+
+  /// No description provided for @lightCaughtHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap it to drop a node there'**
+  String get lightCaughtHint;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

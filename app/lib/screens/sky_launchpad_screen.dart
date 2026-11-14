@@ -44,8 +44,15 @@ class SkyLaunchpadScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpace.sm),
+            // Menyebut masalah yang dipecahkan, bukan sekadar cara memakai.
+            // Tanpa kalimat ini tidak ada apa pun di layar yang menjelaskan
+            // untuk apa Malam Kosmik ada.
             Center(
-              child: Text(l10n.cosmicNightHint, style: context.palette.caption),
+              child: Text(
+                l10n.cosmicNightPurpose,
+                textAlign: TextAlign.center,
+                style: context.palette.caption,
+              ),
             ),
             const SizedBox(height: AppSpace.md),
             // Pintu masuk kedua ke portal yang sama, kali ini dengan timer.
@@ -130,10 +137,7 @@ class _PortalHero extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              mascotName,
-              style: context.palette.title.copyWith(fontSize: 18),
-            ),
+            Text(mascotName, style: context.palette.title),
             const SizedBox(height: AppSpace.sm),
             Align(
               alignment: Alignment.centerRight,
@@ -142,7 +146,7 @@ class _PortalHero extends StatelessWidget {
                 child: SpeechBubble(text: context.l10n.mascotSpeechSky),
               ),
             ),
-            const Center(child: CosmicMascot(size: 140)),
+            const Center(child: CosmicMascot(size: kMascotInline)),
           ],
         ),
       ),
