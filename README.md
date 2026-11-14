@@ -26,3 +26,12 @@ constella/
     ├── README.md                # Catatan tiap file referensi
     └── ref-01-foku-soft-ui-mascot.png
 ```
+
+## Baca Mulai Dari Mana
+
+| Peran | Mulai dari |
+|---|---|
+| Product / stakeholder | `docs/01-product-vision.md` → `docs/04-features-mvp.md` |
+| Designer | `docs/03-design-system.md` → `references/` |
+| Flutter developer | `docs/02-tech-stack.md` → `docs/03-design-system.md` → `app/README.md` |
+| Backend developer | `docs/02-tech-stack.md` → `docs/05-data-models.md` |
