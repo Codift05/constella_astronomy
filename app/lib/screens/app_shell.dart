@@ -4,25 +4,30 @@ import '../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import '../widgets/app_tab_bar.dart';
 import 'constellations_screen.dart';
-import 'focus_session_screen.dart';
 import 'sky_launchpad_screen.dart';
+import 'star_catcher_screen.dart';
 
-/// Tiga tab, satu per fitur PRD yang punya layar sendiri:
-/// Langit (4.1), Rasi (4.2), Fokus (4.4).
-/// Fitur 4.3 Astro-Transit belum punya layar karena belum dibangun.
-enum AppTab { sky, constellations, focus }
+/// Tab hanya untuk tujuan yang berdiri sendiri: Langit (PRD 4.1),
+/// Bintang, dan Rasi (4.2).
+///
+/// Fokus (4.4) sengaja **bukan** tab. PRD menyebutnya sebagai cara masuk ke
+/// Malam Kosmik — "Tombol 'Start focus session' memulai timer dan masuk ke
+/// mode Malam Kosmik" — bukan tujuan tersendiri. Saat ia berdiri sebagai tab
+/// setara, aplikasinya terbaca seperti timer belajar yang nyempil, bukan
+/// aplikasi eksplorasi langit. Pintu masuknya kini ada di layar Langit.
+enum AppTab { sky, stars, constellations }
 
 extension AppTabView on AppTab {
   IconData get icon => switch (this) {
     AppTab.sky => Icons.nights_stay_rounded,
+    AppTab.stars => Icons.filter_center_focus_rounded,
     AppTab.constellations => Icons.hub_rounded,
-    AppTab.focus => Icons.access_time_rounded,
   };
 
   String label(BuildContext context) => switch (this) {
     AppTab.sky => context.l10n.tabSky,
+    AppTab.stars => context.l10n.tabStars,
     AppTab.constellations => context.l10n.tabConstellations,
-    AppTab.focus => context.l10n.tabFocus,
   };
 }
 
@@ -81,8 +86,8 @@ class _AppShellState extends State<AppShell> {
           key: ValueKey(_tab),
           child: switch (_tab) {
             AppTab.sky => const SkyLaunchpadScreen(),
+            AppTab.stars => const StarCatcherScreen(),
             AppTab.constellations => const ConstellationsScreen(),
-            AppTab.focus => const FocusSessionScreen(),
           },
         ),
       ),
