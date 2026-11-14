@@ -9,18 +9,42 @@ Acceptance criteria diturunkan dari mekanik yang ditulis di PRD asli. Baris yang
 **Deskripsi:** Portal spasial AR yang menimpa tangkapan kamera siang hari menjadi malam tata surya.
 
 ### Mekanik & UI
-- Sebuah orb bercahaya di-render melayang di tengah layar kamera.
-- Saat orb diklik, animasi spring melebarkan orb menjadi portal bundar raksasa.
-- Di dalam portal, *sky replacement* diterapkan untuk memunculkan Bima Sakti dan posisi planet real-time.
+- Portal membuka sendiri dengan animasi spring begitu kamera siap.
+- Di dalam portal, langit diganti langit **yang sebenarnya ada di atas pengamat**: bintang katalog HYG pada posisi yang dihitung dari GPS, waktu, dan arah ponsel.
 
 ### Acceptance Criteria
-- [ ] Orb muncul dan melayang stabil relatif terhadap dunia, bukan menempel di layar.
-- [ ] Tap pada orb memicu ekspansi dengan spring physics, bukan kurva linear.
-- [ ] Haptic berat sekali saat portal mencapai ukuran penuh.
-- [ ] Di dalam portal, langit siang diganti Bima Sakti.
-- [ ] Posisi planet di dalam portal sesuai waktu dan koordinat GPS pengguna. *(turunan: toleransi akurasi perlu ditetapkan)*
-- [ ] Portal bisa ditutup dan dibuka ulang tanpa restart sesi AR. *(turunan)*
+- [x] Portal melebar dengan spring physics, bukan kurva linear.
+- [x] Haptic berat sekali saat portal mencapai ukuran penuh.
+- [x] Di dalam portal, langit siang diganti langit malam.
+- [x] Bintang di dalam portal berada di posisi sebenarnya menurut waktu dan koordinat GPS pengguna.
+- [x] Tanpa posisi GPS, tidak ada bintang yang digambar sama sekali.
 - [ ] Ada fallback saat perangkat tidak mendukung sky replacement. *(turunan — lihat `06-open-questions.md`)*
+
+### Keputusan 15 November 2026 — orb dihapus
+
+PRD asli meminta orb bercahaya yang diketuk untuk membuka portal. Orb itu
+**dihapus** atas permintaan pemilik produk setelah pengujian di perangkat.
+Alasannya dua, dan keduanya ditulis di sini supaya keputusannya tidak hilang:
+
+1. Layar ini hanya bisa dimasuki dengan sengaja, lewat tombol "Masuk ke Malam
+   Kosmik". Menahan portalnya di balik satu ketukan lagi tidak menambah apa pun
+   selain langkah.
+2. Orb bergradasi itu satu-satunya benda di aplikasi yang tidak mengikuti arah
+   desain flat 2D yang ditetapkan revisi 14 November.
+
+Konsekuensinya: kriteria "orb melayang stabil relatif terhadap dunia" —
+satu-satunya kriteria yang menuntut world tracking AR penuh — gugur bersamanya.
+
+### Keputusan 15 November 2026 — Bima Sakti diganti langit nyata
+
+PRD meminta "Bima Sakti" di dalam portal. Yang ada sebelumnya memang pita
+Bima Sakti, tapi digambar sebagai hiasan di posisi tetap, bersama 220 bintang
+acak dan tiga planet di koordinat karangan. Semuanya dihapus dan diganti
+bintang sungguhan dari katalog yang sudah dipakai penangkap bintang.
+
+Planet belum ada sama sekali sekarang, dan itu disengaja: menampilkannya butuh
+ephemeris, bukan tiga titik di tempat yang enak dipandang. Lihat
+`06-open-questions.md` #6.
 
 ---
 

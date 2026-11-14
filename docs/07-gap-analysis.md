@@ -35,7 +35,7 @@ PRD §2 menyebut `arkit_plugin` (iOS) dan `arcore_flutter_plugin` (Android). Ked
 
 | Yang hilang tanpa ARKit/ARCore | Akibat yang terlihat pengguna |
 |---|---|
-| World tracking | Orb menempel di tengah layar, ikut bergerak saat ponsel digeser. PRD meminta orb "melayang" di satu titik ruang |
+| World tracking | Dulu: orb menempel di layar. Orbnya sudah dihapus (15 November), jadi akibat ini hilang bersamanya |
 | Anchor spasial | Node rasi bintang memakai koordinat layar. Begitu kamera bergeser, bentuknya ikut bergeser |
 | Scene semantics / sky segmentation | Portal mengganti **seluruh** lingkaran jadi langit malam, termasuk gedung dan tanah, bukan hanya langit |
 | Depth | Tidak bisa membedakan lampu jauh dari lampu dekat |
@@ -47,17 +47,18 @@ Ini satu akar yang menjelaskan 5 dari 13 kriteria yang belum selesai. Memutuskan
 
 ## 7.2 Per fitur
 
-### 4.1 AR Time-Bubble — 4 selesai, 2 sebagian, 1 belum
+### 4.1 AR Time-Bubble — 4 selesai, 1 sebagian, 1 belum, 2 gugur
 
 | Kriteria | Status | Bukti / yang kurang |
 |---|---|---|
-| Orb melayang stabil relatif terhadap dunia | **Sebagian** | Sumbu tegak sudah tertambat: memiringkan ponsel ke atas-bawah membuat orb tetap di titik langit yang sama, dihitung dari akselerometer sehingga tidak hanyut. Arah mata angin **belum** — memutar badan masih membawa orb ikut serta, dan itu hanya bisa diselesaikan world tracking AR |
-| Tap orb → ekspansi spring | **Selesai** | `SpringSimulation` dengan `AppSpring.portal` |
+| Orb melayang stabil relatif terhadap dunia | **Gugur** | Orb dihapus 15 November atas permintaan pemilik produk. Lihat `04-features-mvp.md` §4.1 |
+| Tap orb → ekspansi spring | **Gugur sebagian** | Portal kini membuka sendiri, tetap dengan `SpringSimulation` dan `AppSpring.portal`. Yang hilang hanya ketukannya |
 | Haptic berat saat portal penuh | **Selesai** | `_onPortalTick` memicu `heavyImpact` di ambang 0,98 |
-| Langit siang diganti Bima Sakti | **Selesai** | `_NightSkyPainter` kini sadar cakrawala: hanya bagian di atas garis cakrawala yang diganti, dengan gradasi 90 pt supaya pertemuannya tidak berupa garis keras. Gedung di bawah cakrawala tetap terlihat. **Batasnya:** cakrawalanya geometris, bukan hasil segmentasi — gedung yang menjulang di atas garis itu tetap tertutup langit |
-| Posisi planet sesuai waktu + GPS | **Belum** | 3 planet dengan koordinat tetap di `cosmic_night_screen.dart:506`. Tidak ada GPS di seluruh proyek |
-| Portal bisa ditutup dan dibuka ulang | **Selesai** | `_togglePortal` dua arah, tanpa restart sesi kamera |
-| Fallback saat perangkat tidak mendukung | **Sebagian** | Ada penanganan kamera ditolak/tidak ada + timeout 8 detik. Belum ada deteksi kemampuan sky replacement, karena fiturnya memang belum ada |
+| Langit siang diganti langit malam | **Selesai** | `RealSkyLayer` menggambar bintang katalog HYG di posisi sebenarnya. Selubung malam hanya menutup bagian di atas ufuk, dan ufuknya ikut miring saat ponsel dimiringkan. **Batasnya:** ufuknya geometris, bukan hasil segmentasi — gedung yang menjulang di atas garis itu tetap tertutup langit |
+| Posisi bintang sesuai waktu + GPS | **Selesai** | `StarCatalog.snapshot` dengan lintang, bujur, dan UTC; tanpa posisi tidak ada bintang yang digambar |
+| Posisi planet sesuai waktu + GPS | **Belum** | Tiga planet berkoordinat karangan sudah dihapus, bukan diperbaiki. Menampilkannya butuh ephemeris — lihat `06-open-questions.md` #6 |
+| Portal bisa ditutup dan dibuka ulang | **Gugur** | Tanpa orb, portal tidak punya cara dibuka ulang, jadi ia tidak lagi bisa ditutup. Keluar layar dan masuk lagi memberi hasil yang sama |
+| Fallback saat perangkat tidak mendukung | **Sebagian** | Ada penanganan kamera ditolak/tidak ada + timeout 8 detik. Tanpa kompas, langitnya tidak digambar sama sekali alih-alih digambar di arah tebakan |
 
 ### 4.2 Skyline Constellations — 4 selesai, 1 sebagian, 1 belum
 
@@ -378,3 +379,62 @@ memakai `BackdropGroup`; temuan 5 justru meminta layar baru menirunya.
 
 **Pengujian:** 211 tes lolos, `flutter analyze` bersih, click-through penuh di
 Android 14 tanpa satu galat pun di logcat.
+
+---
+
+## 7.11 Langit nyata di dalam portal — 15 November 2026 dini hari
+
+Permintaan pemilik produk setelah mencoba build iOS di iPhone 13: orb dibuang,
+langit portal diganti sesuatu yang lebih berguna, tabrakan pointer dengan kartu
+keterangan diperbaiki, dan animasinya diperbanyak.
+
+### Yang diganti, dan kenapa
+
+Langit portal sebelumnya hiasan sepenuhnya: 220 bintang berposisi acak tetap,
+pita Bima Sakti yang digambar di tempat yang enak dipandang, dan tiga "planet"
+berkoordinat karangan yang bahkan ditandai `shortcut:` di kodenya sendiri.
+Sementara itu penangkap bintang sudah menghitung langit sungguhan sejak 14
+November. Portalnya hanya tidak memakainya.
+
+| Dibangun | Isi |
+|---|---|
+| `lib/sky/sky_math.dart` | `lookFrame()` — kerangka layar penuh (maju, kanan, atas) dari akselerometer dan magnetometer. `unitFromHorizontal()`, `dot()` |
+| `lib/sky/sky_projection.dart` | `projectToScreen()` proyeksi gnomonik, `focalFor()`, `starRadiusFor()` |
+| `lib/widgets/real_sky_layer.dart` | `RealSkyLayer` — bintang katalog, nama, selubung malam, garis ufuk yang ikut miring |
+| `lib/widgets/stat_chips.dart` | `StatChipRow` bersama untuk kartu bidikan dan layar perayaan |
+| `lib/widgets/entrance.dart` | `EntranceList`, `Entrance`, `CountUpText` |
+
+`lookDirection()` lama hanya menjawab "menghadap ke mana", dan itu tidak cukup
+untuk menaruh bintang di kiri atau kanan tengah layar. `lookFrame()`
+mengembalikan ketiga sumbunya sekaligus, sehingga gambar ikut berputar saat
+ponsel dimiringkan. Keduanya kini dibaca dari kerangka yang sama, bukan
+dihitung dua kali, supaya nama bintang yang disebut layar tidak pernah meleset
+dari titik yang digambar.
+
+### Batas yang diketahui dan ditulis terbuka
+
+| Batas | Akibat |
+|---|---|
+| Bidang pandang kamera dianggap 62 derajat | **Anggapan, bukan ukuran.** Flutter tidak memberi tahu bidang pandang lensa. Kalau meleset, bintang tetap di sisi yang benar, hanya bergeser lebih cepat atau lambat daripada pemandangan di belakangnya |
+| Utara magnetik, bukan utara sejati | Warisan `lookDirection`. Di Indonesia selisihnya sekitar satu derajat, di bawah derau kompas ponsel |
+| Garis rasi belum ada | Katalog HYG tidak memuat ruas garis rasi. Menyambung bintang-bintang terang sendiri akan menghasilkan bentuk yang bukan rasi sebenarnya, jadi tidak dilakukan. Butuh aset berlisensi yang jelas |
+| Planet belum ada | Dihapus, bukan diperbaiki. Butuh ephemeris — `06-open-questions.md` #6 |
+
+### Tabrakan pointer
+
+Titik bidik ada di tengah layar karena di situlah sumbu lensa berada, jadi yang
+dipindahkan bukan titik bidiknya melainkan panelnya. Kartu diringkas dari empat
+baris tabel menjadi tiga chip (340 piksel turun ke 210), lalu dibatasi setinggi
+ruang yang tersisa di bawah lingkaran bidik. Kalau ruangnya tetap tidak cukup,
+kartunya menyusut jadi bentuk pendek — menyusut, bukan terpotong.
+
+### Pengujian
+
+261 tes lolos, `flutter analyze` bersih. Portal yang membuka sendiri, selubung
+malam, dan garis ufuk diperiksa langsung di emulator Android 14.
+
+**Langit berbintangnya belum pernah terlihat di emulator**, dan itu bukan soal
+kodenya: emulator ini tidak pernah menyerahkan posisi GPS ke aplikasi, sama
+seperti yang sudah terdokumentasi di `screenshots/12-penangkap-bintang-butuh-lokasi.png`.
+Tanpa posisi, lapisan langit memang sengaja tidak menggambar apa pun. Buktinya
+harus datang dari ponsel fisik.
