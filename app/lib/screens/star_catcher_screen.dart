@@ -9,6 +9,7 @@ import '../sky/observer_location.dart';
 import '../sky/sky_math.dart';
 import '../sky/sky_orientation.dart';
 import '../sky/star_catalog.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import '../widgets/soft_ui.dart';
 
@@ -192,35 +193,40 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
       child: Scaffold(
         backgroundColor: Colors.black,
         extendBody: true,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            _cameraLayer(),
-            const _BottomScrim(),
-            if (_ready) _Crosshair(locked: _target != null),
-            SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpace.md),
-                child: _topBar(),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SafeArea(
-                top: false,
+        // Tiga kaca di layar ini berbagi satu lintasan backdrop. Tanpa ini
+        // setiap kaca memicu saveLayer sendiri di atas umpan kamera yang
+        // bergerak terus, tiga kali per frame.
+        body: BackdropGroup(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _cameraLayer(),
+              const _BottomScrim(),
+              if (_ready) _Crosshair(locked: _target != null),
+              SafeArea(
+                bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpace.md,
-                    0,
-                    AppSpace.md,
-                    kTabBarInset,
-                  ),
-                  child: _panel(),
+                  padding: const EdgeInsets.all(AppSpace.md),
+                  child: _topBar(),
                 ),
               ),
-            ),
-          ],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpace.md,
+                      0,
+                      AppSpace.md,
+                      kTabBarInset,
+                    ),
+                    child: _panel(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -253,6 +259,7 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
       alignment: Alignment.topCenter,
       child: GlassCard(
         tint: AppNight.scrim,
+        grouped: true,
         radius: 999,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: Text(
@@ -300,7 +307,7 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
 
     final hit = _target;
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 320),
+      duration: context.calm(const Duration(milliseconds: 320)),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       transitionBuilder: (child, animation) => FadeTransition(
@@ -318,7 +325,9 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
               key: const ValueKey('kosong'),
               icon: Icons.filter_center_focus_rounded,
               title: l10n.starNothingHere,
-              body: l10n.starNothingHereBody,
+              // Keadaan kosong inilah yang pertama dilihat pengguna, jadi di
+              // sinilah layar menjelaskan dirinya sendiri.
+              body: '${l10n.starCatcherPurpose}\n\n${l10n.starNothingHereBody}',
             )
           : _StarCard(
               key: ValueKey(hit.star.displayName),
@@ -395,7 +404,7 @@ class _Crosshair extends StatelessWidget {
       child: Center(
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: locked ? 1 : 0),
-          duration: const Duration(milliseconds: 260),
+          duration: context.calm(const Duration(milliseconds: 260)),
           curve: Curves.easeOutBack,
           builder: (context, t, _) => Transform.scale(
             scale: 1 - 0.12 * t,
@@ -468,6 +477,7 @@ class _StarCard extends StatelessWidget {
     final alt = sighted.point.altitude;
     return GlassCard(
       tint: AppNight.scrim,
+      grouped: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -497,14 +507,17 @@ class _StarCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpace.md),
           _row(
+            context,
             l10n.starDistance,
             s.hasDistance
                 ? l10n.starLightYears(_formatLy(s.lightYears))
                 : l10n.starDistanceUnknown,
           ),
-          _row(l10n.starMagnitude, s.magnitude.toStringAsFixed(2)),
-          if (s.spectral.isNotEmpty) _row(l10n.starSpectralType, s.spectral),
+          _row(context, l10n.starMagnitude, s.magnitude.toStringAsFixed(2)),
+          if (s.spectral.isNotEmpty)
+            _row(context, l10n.starSpectralType, s.spectral),
           _row(
+            context,
             l10n.starAltitude,
             alt >= 0
                 ? '${alt.round()}°'
@@ -518,25 +531,38 @@ class _StarCard extends StatelessWidget {
   static String _formatLy(double ly) =>
       ly >= 100 ? ly.round().toString() : ly.toStringAsFixed(1);
 
-  Widget _row(String label, String value) {
+  Widget _row(BuildContext context, String label, String value) {
+    final labelStyle = AppText.caption.copyWith(color: AppNight.onSurfaceMuted);
+    final valueStyle = AppText.caption.copyWith(color: AppNight.onSurface);
+
+    // Kolom label berlebar tetap patah pada Dynamic Type besar, dan label
+    // Indonesia lebih panjang dari Inggris ("Tipe spektral" lawan "Spectral
+    // type"). Di atas ambang ini label pindah ke atas nilainya.
+    final stacked = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    if (stacked) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: labelStyle),
+            Text(value, style: valueStyle),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              label,
-              style: AppText.caption.copyWith(color: AppNight.onSurfaceMuted),
-            ),
+          // Lebarnya mengikuti label terpanjang, bukan angka yang dipatok.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 150),
+            child: IntrinsicWidth(child: Text(label, style: labelStyle)),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: AppText.caption.copyWith(color: AppNight.onSurface),
-            ),
-          ),
+          const SizedBox(width: AppSpace.sm),
+          Expanded(child: Text(value, style: valueStyle)),
         ],
       ),
     );
@@ -564,6 +590,7 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       tint: AppNight.scrim,
+      grouped: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
