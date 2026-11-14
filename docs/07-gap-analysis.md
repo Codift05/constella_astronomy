@@ -146,3 +146,126 @@ Nomor 2 dan 3 adalah satu-satunya pekerjaan yang **tidak terhalang apa pun**. Si
 keputusan produk, bukan menunggu kode.
 
 ---
+
+## 7.6 Yang dihapus pada 14 November 2026
+
+Pembersihan elemen yang tidak bisa dilacak ke PRD.
+
+| Dihapus | Asal | Alasan |
+|---|---|---|
+| Kategori fokus (Study / Work / Creative / Reading) | Gambar referensi Foku | Tidak ada di PRD. Enum `FocusCategory`, kartu "What are you focusing on?", dan 4 kunci l10n ikut dihapus |
+| Kartu "Tonight above you" (4 planets visible, 2 transits overhead) | Karangan sendiri | Angkanya tidak bersumber dari apa pun — tidak ada GPS, tidak ada API radar. Menampilkan data palsu seolah nyata |
+| Tab Profile beserta layarnya | Karangan sendiri | PRD §4.4 meminta **indikator status**, bukan layar profil. Fungsinya pindah ke kartu Stardust di layar Langit |
+| Angka hardcode `340` / `12` / `185` | Karangan sendiri | Diganti nilai nyata dari `StardustStore` dan `ConstellationStore` |
+| `SoftProgressBar` lurus untuk Stardust | Salah baca PRD | PRD meminta progress bar **melengkung**. Diganti `CurvedProgressBar` |
+
+Navigasi menyusut dari 4 tab menjadi 3: Langit, Rasi, Fokus — satu per fitur PRD yang punya layar.
+Fitur 4.3 Astro-Transit belum punya tab karena belum dibangun.
+
+---
+
+## 7.7 Dark mode — dibangun 14 November 2026
+
+Bukan salah satu dari 27 kriteria, tapi tercatat di §7.4 sebagai utang yang akan menagih. Sekarang
+lunas.
+
+| Bagian | Hasil |
+|---|---|
+| Sumber warna | `AppColor` dibubarkan. Seluruh warna pindah ke `AppPalette` (`ThemeExtension`) dengan instance `light` dan `dark` |
+| Perpindahan | Diinterpolasi lewat `lerp`, 360 ms `easeInOutCubic`. Tidak berkedip |
+| Pilihan pengguna | Ikut sistem (bawaan) / terang / gelap, diputar lewat tombol di header Langit, tersimpan di `profile.theme_mode` (migrasi SQLite v3) |
+| Status bar | `AnnotatedRegion` mengikuti tema; layar AR memaksa ikon terang karena ia selalu hitam |
+| Permukaan yang tidak ikut tema | Layar AR, lapisan gambar rasi, galat kamera — semuanya memakai `AppNight` |
+| Penjagaan kontras | 34 pasangan warna diperiksa terhadap WCAG AA di setiap `flutter test` |
+
+Tiga token **berbalik** antar tema, tidak sekadar digelapkan: tombol utama, pemisah kartu, dan chip
+terpilih. Alasannya ada di [03-design-system.md §3.1](03-design-system.md).
+
+**Cacat yang ikut tertangkap.** Tes kontras baru itu langsung menemukan kesalahan di tema **terang**
+yang lolos dari audit Apple manual sebelumnya: `accentStrong` lama `#5C8EE6` hanya **2,997:1** di
+latar sekunder `#F4F6F8`, sementara ambang ikon non-teks adalah 3:1. Audit sebelumnya menghitungnya
+terhadap putih (3,25:1) dan tidak memeriksa latar sekunder, padahal ikon empty-state daftar rasi dan
+titik indikator onboarding digambar di sana. Diganti `#5687DC`: 3,29:1 di latar sekunder, 3,56:1 di
+kartu putih, 3,11:1 di `accentWash`.
+
+**Status pengujian:** 107 tes lolos (57 sebelumnya + 41 kontras + 7 mode tema + 2 destructive),
+`flutter analyze` bersih.
+
+### Diverifikasi di aplikasi berjalan, bukan hanya di tes
+
+Emulator akhirnya bisa dijalankan setelah disk dibersihkan pada 14 November. Penyebab ia gagal
+sebelumnya ada dua, dan keduanya sudah dicatat agar tidak mengulang pencarian: disk penuh, lalu
+renderer software `swiftshader_indirect` yang **segfault** saat boot. Perintah yang berhasil:
+
+```
+emulator -avd iphone_13 -no-window -gpu host -memory 2048 -no-audio
+```
+
+Yang terbukti jalan di Android 14 (1170x2532), bukan sekadar lolos tes:
+
+| Diperiksa | Hasil |
+|---|---|
+| Onboarding peluncuran pertama | Tampil, maskot diam saat teks berganti, Lewati bekerja |
+| Tema terang dan gelap di tiga tab | Benar. Tombol utama berbalik, kartu dapat tepi, ikon status bar ikut |
+| Pilihan tema bertahan | Tutup paksa lalu buka lagi: tetap gelap, onboarding tidak muncul lagi. Migrasi SQLite v3 bekerja |
+| Portal AR | Terbuka penuh, starfield dan pita Bima Sakti tampil, petunjuk berganti ke "Tap the city lights" |
+| Preview kamera | Memenuhi layar. Umpan emulator memang rusak — aplikasi kamera **bawaan Android** menampilkan kerusakan yang sama, jadi itu emulatornya, bukan kode kita |
+
+Tangkapan layarnya ada di [screenshots/](screenshots/).
+
+**Yang masih belum terverifikasi di perangkat nyata:** menggambar rasi di atas umpan kamera
+sungguhan, hapus-geser, dan ganti nama. Umpan kamera emulator terlalu rusak untuk menguji
+penempatan node, dan itu memang pekerjaan untuk ponsel fisik.
+
+---
+
+## 7.8 Cakrawala dari sensor — dibangun 14 November 2026 sore
+
+PRD §4.1 meminta langit siang diganti Bima Sakti, dan orb melayang stabil terhadap dunia. Keduanya
+tercatat **Sebagian** karena portal menutupi seluruh lingkaran — termasuk gedung dan tanah — dan orb
+terkunci di tengah layar.
+
+Keduanya butuh satu hal yang sama: ponsel harus tahu di mana atas. Itu tidak memerlukan ARKit atau
+ARCore. Akselerometer mengukur arah gravitasi, jadi **sudut elevasi bersifat absolut dan tidak
+hanyut**.
+
+| Dibangun | Isi |
+|---|---|
+| `lib/ar/sky_attitude.dart` | `skyElevation()` — elevasi kamera dari satu pembacaan akselerometer. `horizonY()` — posisi cakrawala di layar lewat model pinhole. `SkyAttitude` — aliran sensor yang dilicinkan low-pass |
+| Langit sadar cakrawala | `_NightSkyPainter` hanya mengisi di atas garis cakrawala, dengan gradasi 90 pt di pertemuannya. Bintang dan Bima Sakti tertambat ke pita langit setinggi 3x layar, jadi ikut bergeser saat ponsel dimiringkan |
+| Orb tertambat tegak | Orb tetap di titik langit yang sama saat ponsel diangguk, dibatasi 34% tinggi layar supaya selalu bisa dijangkau jari |
+| Paket baru | `sensors_plus: ^7.1.1` — satu-satunya dependensi yang ditambahkan |
+
+### Yang sengaja tidak dibangun
+
+**Arah mata angin tidak dipalsukan.** Memutar badan ke kiri atau kanan tidak terbaca akselerometer.
+Giroskop bisa diintegrasikan untuk menebaknya, tapi hasilnya hanyut beberapa derajat per menit —
+bentuk rasi yang sudah digambar akan merayap pelan dari tempatnya, dan itu lebih buruk daripada
+jujur terkunci ke layar. Sumbu itu menunggu world tracking sungguhan
+([#1–#4](06-open-questions.md)).
+
+### Biaya performa yang belum diukur di perangkat nyata
+
+Painter sekarang memakai satu `saveLayer` untuk gradasi cakrawala dan menggambar 520 bintang, naik
+dari 220. Untuk menahan biayanya, `SkyAttitude` hanya memberi tahu pendengar saat elevasi berubah
+lebih dari ~0,7 derajat, jadi raster cache langit tetap berguna selama ponsel relatif diam. Angka
+frame di perangkat nyata **belum diukur** — emulator memakai vsync-nya sendiri sehingga angkanya
+tidak mewakili.
+
+### Diverifikasi di emulator dengan sensor palsu
+
+`adb emu sensor set acceleration x:y:z` memberi nilai akselerometer apa pun, jadi keempat sikap bisa
+diuji sungguhan:
+
+| Sikap | Nilai | Hasil |
+|---|---|---|
+| Tegak, kamera di cakrawala | `0:9.81:0` | Garis cakrawala di tengah layar, langit di atas, gedung di bawah |
+| Menengadah 30° | `0:8.496:-4.905` | Cakrawala turun ke ~85% layar, langit mengisi hampir semuanya |
+| Menunduk 30° | `0:8.496:4.905` | Cakrawala naik, langit menyusut |
+| Menghadap tanah 80° | `0:1.7:9.66` | **Nol langit** — umpan kamera utuh, cabang `line <= 0` bekerja |
+
+Tangkapan layarnya ada di [screenshots/](screenshots/) nomor 06 sampai 09.
+
+**Pengujian:** 23 tes baru di `sky_attitude_test.dart` — matematika elevasi (termasuk jatuh bebas dan
+sudut ekstrem), monotonitas `horizonY`, serta perilaku pelicin, ambang derau, tenggat sensor, dan
+langganan ganda. Total **130 tes lolos**, `flutter analyze` bersih.
