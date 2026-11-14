@@ -199,7 +199,6 @@ class ConstellationDraftCard extends StatelessWidget {
             style: AppText.body.copyWith(
               color: Colors.white,
               fontFamily: AppFont.rounded,
-              fontSize: 18,
             ),
             cursorColor: AppNight.accent,
             textInputAction: TextInputAction.done,
@@ -210,7 +209,6 @@ class ConstellationDraftCard extends StatelessWidget {
               hintStyle: AppText.body.copyWith(
                 color: Colors.white38,
                 fontFamily: AppFont.rounded,
-                fontSize: 18,
               ),
             ),
           ),

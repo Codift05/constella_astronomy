@@ -55,7 +55,7 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                           style: context.palette.caption,
                         ),
                         const SizedBox(height: AppSpace.md),
-                        const CosmicMascot(size: 150),
+                        const CosmicMascot(size: kMascotInline),
                         const SizedBox(height: AppSpace.lg),
                         _durationCard(),
                       ],

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../data/app_settings.dart';
 import '../l10n/l10n_ext.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import '../widgets/mascot.dart';
 import '../widgets/soft_ui.dart';
@@ -46,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       return;
     }
     _pages.nextPage(
-      duration: const Duration(milliseconds: 420),
+      duration: context.calm(const Duration(milliseconds: 420)),
       curve: Curves.easeOutCubic,
     );
   }
@@ -82,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 // Maskot tetap di tempat sementara teksnya berganti, supaya
                 // terasa satu karakter yang sedang bicara, bukan empat layar.
-                const CosmicMascot(size: 160),
+                const CosmicMascot(size: kMascotHero),
                 const SizedBox(height: AppSpace.lg),
                 Expanded(
                   child: PageView.builder(
@@ -96,6 +97,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           horizontal: AppSpace.lg,
                         ),
                         child: Column(
+                          // Dipusatkan di ruang yang tersisa. Perataan awal
+                          // menyisakan rongga besar tanpa makna di ponsel
+                          // tinggi (layout.md > Visual hierarchy).
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SpeechBubble(text: title),
                             const SizedBox(height: AppSpace.md),
@@ -148,7 +153,7 @@ class _Dots extends StatelessWidget {
       children: [
         for (var i = 0; i < count; i++)
           AnimatedContainer(
-            duration: const Duration(milliseconds: 240),
+            duration: context.calm(const Duration(milliseconds: 240)),
             curve: Curves.easeOutCubic,
             margin: const EdgeInsets.symmetric(horizontal: 4),
             width: i == index ? 22 : 8,
