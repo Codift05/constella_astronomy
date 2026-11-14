@@ -25,6 +25,42 @@ Future<void> _openTab(WidgetTester tester, String label) async {
   await _settle(tester);
 }
 
+/// Fokus bukan tab lagi. PRD 4.4 menempatkannya sebagai cara masuk Malam
+/// Kosmik, jadi pintunya ada di layar Langit dan membuka rute baru.
+Future<void> _openFocus(WidgetTester tester) async {
+  final entry = find.widgetWithText(PillButton, 'Start a focus session');
+  await tester.runAsync(() async {
+    // ListView membangun anaknya secara malas: pada teks 200 persen tombol
+    // ini belum ada di pohon sampai digulir ke sana, dan ensureVisible saja
+    // melempar "No element".
+    if (entry.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        entry,
+        240,
+        scrollable: find.byType(Scrollable).first,
+      );
+    }
+    await tester.ensureVisible(entry);
+    await tester.pump();
+    await tester.tap(entry);
+    await tester.pump();
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await tester.pump();
+  });
+  await _settle(tester);
+}
+
+/// Kembali ke kerangka tab dari rute yang di-push.
+Future<void> _closeFocus(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    await tester.tap(find.byIcon(Icons.chevron_left_rounded).first);
+    await tester.pump();
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await tester.pump();
+  });
+  await _settle(tester);
+}
+
 void main() {
   sqfliteFfiInit();
 
@@ -58,7 +94,8 @@ void main() {
     await _openTab(tester, 'Shapes');
     expect(find.text('No constellations yet'), findsOneWidget);
 
-    await _openTab(tester, 'Focus');
+    await _openTab(tester, 'Sky');
+    await _openFocus(tester);
     expect(find.text('Focus Session'), findsOneWidget);
 
     expect(tester.takeException(), isNull);
@@ -67,7 +104,7 @@ void main() {
   testWidgets('Stepper dan chip durasi mengubah angka', (tester) async {
     await tester.pumpWidget(_app);
     await _settle(tester);
-    await _openTab(tester, 'Focus');
+    await _openFocus(tester);
 
     expect(find.text('25'), findsOneWidget);
 
@@ -95,10 +132,13 @@ void main() {
     await _settle(tester);
     expect(tester.takeException(), isNull);
 
-    for (final tab in ['Shapes', 'Focus', 'Sky']) {
+    for (final tab in ['Shapes', 'Sky']) {
       await _openTab(tester, tab);
       expect(tester.takeException(), isNull, reason: 'tab $tab');
     }
+    await _openFocus(tester);
+    expect(tester.takeException(), isNull, reason: 'layar Fokus');
+    await _closeFocus(tester);
   });
 }
 
@@ -119,10 +159,11 @@ void _dynamicTypeTests() {
     await _settle(tester);
     expect(tester.takeException(), isNull, reason: 'tab Sky');
 
-    for (final tab in ['Shapes', 'Focus']) {
-      await _openTab(tester, tab);
-      expect(tester.takeException(), isNull, reason: 'tab $tab');
-    }
+    await _openTab(tester, 'Shapes');
+    expect(tester.takeException(), isNull, reason: 'tab Shapes');
+    await _openTab(tester, 'Sky');
+    await _openFocus(tester);
+    expect(tester.takeException(), isNull, reason: 'layar Fokus');
   });
 }
 
@@ -138,7 +179,7 @@ void _chipWidthTest() {
 
     await tester.pumpWidget(_app);
     await _settle(tester);
-    await _openTab(tester, 'Focus');
+    await _openFocus(tester);
 
     final chip = tester.getSize(find.widgetWithText(SoftChip, '25m'));
     expect(chip.height, greaterThanOrEqualTo(44));

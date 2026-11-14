@@ -63,11 +63,13 @@ class _FocusSessionScreenState extends State<FocusSessionScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     AppSpace.md,
                     0,
                     AppSpace.md,
-                    kTabBarInset,
+                    // Sebagai rute yang di-push tidak ada tab bar di bawahnya,
+                    // jadi ruang itu tidak perlu disisakan lagi.
+                    Navigator.of(context).canPop() ? AppSpace.xl : kTabBarInset,
                   ),
                   child: PillButton(
                     label: context.l10n.startFocusSession,

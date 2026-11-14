@@ -9,6 +9,7 @@ import '../widgets/mascot.dart';
 import '../widgets/soft_ui.dart';
 import '../widgets/theme_toggle.dart';
 import 'cosmic_night_screen.dart';
+import 'focus_session_screen.dart';
 
 /// Layar utama: landasan masuk ke AR, plus indikator Stardust Energy
 /// (PRD §4.4 "Status Bar").
@@ -45,6 +46,21 @@ class SkyLaunchpadScreen extends StatelessWidget {
             const SizedBox(height: AppSpace.sm),
             Center(
               child: Text(l10n.cosmicNightHint, style: context.palette.caption),
+            ),
+            const SizedBox(height: AppSpace.md),
+            // Pintu masuk kedua ke portal yang sama, kali ini dengan timer.
+            // PRD 4.4 menempatkan sesi fokus sebagai cara masuk Malam Kosmik.
+            PillButton(
+              label: l10n.focusEntry,
+              color: context.palette.accentWash,
+              labelColor: context.palette.textPrimary,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FocusSessionScreen()),
+              ),
+            ),
+            const SizedBox(height: AppSpace.sm),
+            Center(
+              child: Text(l10n.focusEntryHint, style: context.palette.caption),
             ),
             const SizedBox(height: AppSpace.lg),
             const _StardustCard(),
