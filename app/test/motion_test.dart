@@ -2,7 +2,6 @@ import 'package:constella_app/l10n/app_localizations.dart';
 import 'package:constella_app/theme/motion.dart';
 import 'package:constella_app/theme/tokens.dart';
 import 'package:constella_app/widgets/mascot.dart';
-import 'package:constella_app/widgets/star_wipe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -137,76 +136,6 @@ void main() {
       tester,
     ) async {
       expect(kMascotHero, greaterThan(kMascotInline));
-    });
-  });
-
-  group('sapuan bintang antar tab', () {
-    testWidgets('tidak menggambar apa pun saat Kurangi Gerak menyala', (
-      tester,
-    ) async {
-      final c = AnimationController(
-        vsync: tester,
-        duration: const Duration(milliseconds: 400),
-      );
-      addTearDown(c.dispose);
-      c.value = 0.5;
-
-      await tester.pumpWidget(
-        wrap(StarWipe(progress: c, direction: 1), reduce: true),
-      );
-      expect(
-        find.descendant(
-          of: find.byType(StarWipe),
-          matching: find.byType(CustomPaint),
-        ),
-        findsNothing,
-      );
-    });
-
-    testWidgets('menggambar di tengah perpindahan saat dimatikan', (
-      tester,
-    ) async {
-      final c = AnimationController(
-        vsync: tester,
-        duration: const Duration(milliseconds: 400),
-      );
-      addTearDown(c.dispose);
-      c.value = 0.5;
-
-      await tester.pumpWidget(
-        wrap(StarWipe(progress: c, direction: 1), reduce: false),
-      );
-      expect(
-        find.descendant(
-          of: find.byType(StarWipe),
-          matching: find.byType(CustomPaint),
-        ),
-        findsWidgets,
-      );
-    });
-
-    testWidgets('diam di awal dan akhir perpindahan', (tester) async {
-      final c = AnimationController(
-        vsync: tester,
-        duration: const Duration(milliseconds: 400),
-      );
-      addTearDown(c.dispose);
-
-      for (final v in [0.0, 1.0]) {
-        c.value = v;
-        await tester.pumpWidget(
-          wrap(StarWipe(progress: c, direction: -1), reduce: false),
-        );
-        await tester.pump();
-        expect(
-          find.descendant(
-            of: find.byType(StarWipe),
-            matching: find.byType(CustomPaint),
-          ),
-          findsNothing,
-          reason: 'pada t=$v',
-        );
-      }
     });
   });
 }

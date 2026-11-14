@@ -10,7 +10,7 @@ import 'soft_ui.dart';
 
 /// Nama placeholder. Maskot final butuh nama dan desain orisinal —
 /// docs/06-open-questions.md #17.
-const mascotName = 'Nova';
+const mascotName = 'Lumi';
 
 /// Dua ukuran maskot, masing-masing dengan alasannya (R-31).
 ///
@@ -93,12 +93,10 @@ class _MascotPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    final body = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFF5B9BFF), Color(0xFF2F62E8)],
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
+    // Isian pastel polos, tanpa gradasi: revisi 15 November meminta flat 2D
+    // vector murni. Kedalaman kini datang dari bentuk dan bayangan, bukan
+    // dari warna yang melandai.
+    final body = Paint()..color = const Color(0xFF5B9BFF);
 
     // Telinga.
     for (final dx in [0.30, 0.70]) {

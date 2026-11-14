@@ -391,4 +391,41 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get lightCaughtHint => 'Tap it to drop a node there';
+
+  @override
+  String get catchStar => 'Catch this star';
+
+  @override
+  String get starCaught => 'Caught!';
+
+  @override
+  String get starAlreadyCaught => 'Already in your collection';
+
+  @override
+  String get starCatchPraise => 'Who gave you permission to find that one?';
+
+  @override
+  String get starCatchPraiseDim => 'That one is barely visible from a city.';
+
+  @override
+  String get statDistance => 'DISTANCE';
+
+  @override
+  String get statMagnitude => 'BRIGHTNESS';
+
+  @override
+  String get statConstellation => 'CONSTELLATION';
+
+  @override
+  String claimStardust(int amount) {
+    return 'Claim $amount Stardust';
+  }
+
+  @override
+  String starCollectionCount(int count) {
+    return '$count caught';
+  }
+
+  @override
+  String get closeCelebration => 'Keep looking';
 }

@@ -229,5 +229,30 @@
   "starCatcherPurpose": "Aim the crosshair at any star. Constella names it from where you stand and the time on your phone, with no internet.",
   "arPortalTip": "Everything above the horizon becomes night sky. Buildings and ground stay as they are.",
   "lightCaught": "Bright light caught",
-  "lightCaughtHint": "Tap it to drop a node there"
+  "lightCaughtHint": "Tap it to drop a node there",
+  "catchStar": "Catch this star",
+  "starCaught": "Caught!",
+  "starAlreadyCaught": "Already in your collection",
+  "starCatchPraise": "Who gave you permission to find that one?",
+  "starCatchPraiseDim": "That one is barely visible from a city.",
+  "statDistance": "DISTANCE",
+  "statMagnitude": "BRIGHTNESS",
+  "statConstellation": "CONSTELLATION",
+  "claimStardust": "Claim {amount} Stardust",
+  "@claimStardust": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "starCollectionCount": "{count} caught",
+  "@starCollectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "closeCelebration": "Keep looking"
 }

@@ -182,14 +182,8 @@ class _Backdrop extends StatelessWidget {
       height: 480,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              context.palette.accentWash,
-              context.palette.backgroundSecondary,
-            ],
-          ),
+          // Pastel polos, bukan gradasi (revisi 15 November, flat 2D).
+          color: context.palette.accentWash,
           borderRadius: BorderRadius.circular(300),
         ),
       ),

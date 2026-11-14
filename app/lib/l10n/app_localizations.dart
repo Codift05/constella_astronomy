@@ -750,6 +750,72 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Tap it to drop a node there'**
   String get lightCaughtHint;
+
+  /// No description provided for @catchStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Catch this star'**
+  String get catchStar;
+
+  /// No description provided for @starCaught.
+  ///
+  /// In en, this message translates to:
+  /// **'Caught!'**
+  String get starCaught;
+
+  /// No description provided for @starAlreadyCaught.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in your collection'**
+  String get starAlreadyCaught;
+
+  /// No description provided for @starCatchPraise.
+  ///
+  /// In en, this message translates to:
+  /// **'Who gave you permission to find that one?'**
+  String get starCatchPraise;
+
+  /// No description provided for @starCatchPraiseDim.
+  ///
+  /// In en, this message translates to:
+  /// **'That one is barely visible from a city.'**
+  String get starCatchPraiseDim;
+
+  /// No description provided for @statDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'DISTANCE'**
+  String get statDistance;
+
+  /// No description provided for @statMagnitude.
+  ///
+  /// In en, this message translates to:
+  /// **'BRIGHTNESS'**
+  String get statMagnitude;
+
+  /// No description provided for @statConstellation.
+  ///
+  /// In en, this message translates to:
+  /// **'CONSTELLATION'**
+  String get statConstellation;
+
+  /// No description provided for @claimStardust.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim {amount} Stardust'**
+  String claimStardust(int amount);
+
+  /// No description provided for @starCollectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} caught'**
+  String starCollectionCount(int count);
+
+  /// No description provided for @closeCelebration.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep looking'**
+  String get closeCelebration;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -389,4 +389,41 @@ class AppL10nId extends AppL10n {
 
   @override
   String get lightCaughtHint => 'Ketuk untuk menaruh node di sana';
+
+  @override
+  String get catchStar => 'Tangkap bintang ini';
+
+  @override
+  String get starCaught => 'Tertangkap!';
+
+  @override
+  String get starAlreadyCaught => 'Sudah ada di koleksimu';
+
+  @override
+  String get starCatchPraise => 'Siapa yang mengizinkanmu menemukan yang itu?';
+
+  @override
+  String get starCatchPraiseDim => 'Yang itu nyaris tak terlihat dari kota.';
+
+  @override
+  String get statDistance => 'JARAK';
+
+  @override
+  String get statMagnitude => 'KECERAHAN';
+
+  @override
+  String get statConstellation => 'RASI';
+
+  @override
+  String claimStardust(int amount) {
+    return 'Klaim $amount Stardust';
+  }
+
+  @override
+  String starCollectionCount(int count) {
+    return '$count tertangkap';
+  }
+
+  @override
+  String get closeCelebration => 'Lanjut mencari';
 }

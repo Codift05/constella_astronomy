@@ -129,5 +129,30 @@
   "starCatcherPurpose": "Arahkan bidikan ke bintang mana pun. Constella mengenalinya dari posisimu dan jam di ponsel, tanpa internet.",
   "arPortalTip": "Semua yang di atas cakrawala berubah jadi langit malam. Gedung dan tanah tetap apa adanya.",
   "lightCaught": "Cahaya terang tertangkap",
-  "lightCaughtHint": "Ketuk untuk menaruh node di sana"
+  "lightCaughtHint": "Ketuk untuk menaruh node di sana",
+  "catchStar": "Tangkap bintang ini",
+  "starCaught": "Tertangkap!",
+  "starAlreadyCaught": "Sudah ada di koleksimu",
+  "starCatchPraise": "Siapa yang mengizinkanmu menemukan yang itu?",
+  "starCatchPraiseDim": "Yang itu nyaris tak terlihat dari kota.",
+  "statDistance": "JARAK",
+  "statMagnitude": "KECERAHAN",
+  "statConstellation": "RASI",
+  "claimStardust": "Klaim {amount} Stardust",
+  "@claimStardust": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "starCollectionCount": "{count} tertangkap",
+  "@starCollectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "closeCelebration": "Lanjut mencari"
 }

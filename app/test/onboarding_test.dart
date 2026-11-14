@@ -60,7 +60,7 @@ void main() {
       await tester.pumpWidget(app);
       await tester.pump(const Duration(milliseconds: 600));
 
-      expect(find.text('Hello, I am Nova'), findsOneWidget);
+      expect(find.text('Hello, I am Lumi'), findsOneWidget);
       expect(find.text('Sky'), findsNothing);
     });
 

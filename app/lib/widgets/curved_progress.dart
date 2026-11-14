@@ -46,8 +46,7 @@ class CurvedProgressBar extends StatelessWidget {
             painter: _ArcPainter(
               t,
               track: p.controlSurface,
-              gradientStart: p.accentPrimary,
-              gradientEnd: p.accentStrong,
+              fill: p.accentStrong,
             ),
             child: Center(
               // Jaring pengaman terakhir: pada skala teks ekstrem isinya
@@ -88,20 +87,14 @@ class CurvedProgressBar extends StatelessWidget {
 }
 
 class _ArcPainter extends CustomPainter {
-  const _ArcPainter(
-    this.value, {
-    required this.track,
-    required this.gradientStart,
-    required this.gradientEnd,
-  });
+  const _ArcPainter(this.value, {required this.track, required this.fill});
 
   final double value;
 
   /// Painter tidak bisa membaca [BuildContext], jadi warna palet diteruskan
   /// lewat konstruktor dan dibandingkan di [shouldRepaint].
   final Color track;
-  final Color gradientStart;
-  final Color gradientEnd;
+  final Color fill;
 
   /// Busur membentang 240 derajat, terbuka di bawah.
   static const _start = math.pi * 0.75;
@@ -135,12 +128,11 @@ class _ArcPainter extends CustomPainter {
       _start,
       _sweep * value,
       false,
+      // Satu warna penuh, bukan gradasi menyapu (revisi 15 November).
+      // Nilai yang dibaca adalah panjang busurnya, dan itu tetap terbaca
+      // jelas tanpa warna yang berubah sepanjang jalan.
       Paint()
-        ..shader = SweepGradient(
-          startAngle: _start,
-          endAngle: _start + _sweep,
-          colors: [gradientStart, gradientEnd],
-        ).createShader(rect)
+        ..color = fill
         ..strokeWidth = stroke
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke,
@@ -151,6 +143,5 @@ class _ArcPainter extends CustomPainter {
   bool shouldRepaint(_ArcPainter oldDelegate) =>
       oldDelegate.value != value ||
       oldDelegate.track != track ||
-      oldDelegate.gradientStart != gradientStart ||
-      oldDelegate.gradientEnd != gradientEnd;
+      oldDelegate.fill != fill;
 }

@@ -204,14 +204,8 @@ class _SkyBackdrop extends StatelessWidget {
       height: 420,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              context.palette.accentWash,
-              context.palette.backgroundSecondary,
-            ],
-          ),
+          // Pastel polos, bukan gradasi (revisi 15 November, flat 2D).
+          color: context.palette.accentWash,
           borderRadius: BorderRadius.circular(300),
         ),
       ),

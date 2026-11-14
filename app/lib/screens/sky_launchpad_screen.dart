@@ -122,11 +122,8 @@ class _PortalHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: ShapeDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [context.palette.heroHaloStart, context.palette.heroHaloEnd],
-        ),
+        // Satu warna pastel, bukan gradasi (revisi 15 November, flat 2D).
+        color: context.palette.heroHaloStart,
         shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(AppRadius.sheet),
         ),
