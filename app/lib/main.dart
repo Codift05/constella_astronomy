@@ -11,6 +11,7 @@ import 'l10n/app_localizations.dart';
 import 'screens/app_shell.dart';
 import 'screens/onboarding_screen.dart';
 import 'stardust/stardust_store.dart';
+import 'theme/motion.dart';
 import 'theme/tokens.dart';
 
 Future<void> main() async {
@@ -130,7 +131,7 @@ class _Root extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 420),
+        duration: context.calm(const Duration(milliseconds: 420)),
         switchInCurve: Curves.easeOutCubic,
         child: done
             ? const AppShell(key: ValueKey('shell'))

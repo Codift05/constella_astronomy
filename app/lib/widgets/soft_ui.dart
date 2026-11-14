@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 
 /// Membungkus child dengan scale spring saat ditekan, plus haptic.
@@ -40,9 +40,7 @@ class _SpringTapState extends State<SpringTap>
   }
 
   void _springTo(double target) {
-    _c.animateWith(
-      SpringSimulation(AppSpring.press, _c.value, target, _c.velocity),
-    );
+    springTo(_c, AppSpring.press, target, reduceMotion: context.reduceMotion);
   }
 
   @override
@@ -237,7 +235,7 @@ class SoftChip extends StatelessWidget {
       onTap: onTap,
       pressedScale: 0.93,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: context.calm(const Duration(milliseconds: 180)),
         curve: Curves.easeOutBack,
         constraints: const BoxConstraints(minHeight: kMinTapTarget),
         padding: EdgeInsets.symmetric(

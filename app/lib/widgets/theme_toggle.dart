@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../data/app_settings.dart';
 import '../l10n/l10n_ext.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'soft_ui.dart';
 
@@ -51,7 +52,7 @@ class ThemeToggleButton extends StatelessWidget {
               shadows: p.softShadow,
             ),
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 260),
+              duration: context.calm(const Duration(milliseconds: 260)),
               switchInCurve: Curves.easeOutBack,
               switchOutCurve: Curves.easeIn,
               // Ikon berputar seperempat putaran saat berganti, supaya

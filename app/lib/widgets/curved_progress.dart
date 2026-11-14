@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 
 /// Progress bar melengkung untuk Stardust Energy (PRD §4.4 "Status Bar":
@@ -31,7 +32,7 @@ class CurvedProgressBar extends StatelessWidget {
     final p = context.palette;
     return TweenAnimationBuilder<double>(
       tween: Tween(end: value.clamp(0.0, 1.0)),
-      duration: const Duration(milliseconds: 900),
+      duration: context.calm(const Duration(milliseconds: 900)),
       curve: Curves.elasticOut,
       builder: (context, t, _) => SizedBox(
         width: size,

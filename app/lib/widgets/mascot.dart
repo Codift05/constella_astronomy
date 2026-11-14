@@ -4,12 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/l10n_ext.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'soft_ui.dart';
 
 /// Nama placeholder. Maskot final butuh nama dan desain orisinal —
 /// docs/06-open-questions.md #17.
 const mascotName = 'Nova';
+
+/// Dua ukuran maskot, masing-masing dengan alasannya (R-31).
+///
+/// [kMascotHero] untuk layar yang isinya hanya maskot dan satu kalimat, tempat
+/// ia memang jadi pusat perhatian. [kMascotInline] untuk maskot yang duduk di
+/// dalam kartu bersama isi lain.
+const kMascotHero = 160.0;
+const kMascotInline = 140.0;
 
 /// shortcut: maskot digambar 2D dengan CustomPainter, bukan model 3D.
 /// Upgrade ke 3D (model_viewer / three_dart) setelah asset karakter jadi.
@@ -28,7 +37,16 @@ class _CosmicMascotState extends State<CosmicMascot>
   late final AnimationController _float = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 3),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Napas maskot berjalan selamanya, jadi setelan sistem inilah kendali
+    // hentinya (R-39). Dipasang di sini, bukan initState, karena MediaQuery
+    // baru bisa dibaca setelah dependensi terpasang.
+    holdOrRepeat(_float, reduceMotion: context.reduceMotion);
+  }
 
   @override
   void dispose() {

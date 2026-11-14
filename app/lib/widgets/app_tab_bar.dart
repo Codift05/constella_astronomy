@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'soft_ui.dart';
 
@@ -46,13 +46,11 @@ class _AppTabBarState<T> extends State<AppTabBar<T>>
     super.didUpdateWidget(oldWidget);
     final target = widget.tabs.indexOf(widget.current).toDouble();
     if (target != _slide.value) {
-      _slide.animateWith(
-        SpringSimulation(
-          AppSpring.popup,
-          _slide.value,
-          target,
-          _slide.velocity,
-        ),
+      springTo(
+        _slide,
+        AppSpring.popup,
+        target,
+        reduceMotion: context.reduceMotion,
       );
     }
   }
@@ -184,7 +182,7 @@ class _TabItem extends StatelessWidget {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(end: selected ? 1 : 0),
-                duration: const Duration(milliseconds: 240),
+                duration: context.calm(const Duration(milliseconds: 240)),
                 curve: Curves.easeOutCubic,
                 builder: (context, t, child) => Transform.translate(
                   offset: Offset(0, -2 * t),
