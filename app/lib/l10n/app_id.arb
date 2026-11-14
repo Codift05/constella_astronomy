@@ -57,5 +57,21 @@
   "focusMinutesTotal": "{minutes} menit fokus",
   "sessionRemainingLabel": "tersisa",
   "sessionCompleteBodyShort": "{minutes} menit di bawah langit malam.",
-  "constellationsCount": "{count, plural, =0{Belum ada bentuk} other{{count} bentuk}}"
+  "constellationsCount": "{count, plural, =0{Belum ada bentuk} other{{count} bentuk}}",
+  "onboardingWelcomeTitle": "Halo, aku {name}",
+  "onboardingWelcomeBody": "Aku akan menemanimu menjelajahi langit di atas kotamu.",
+  "onboardingPortalTitle": "Buka Malam Kosmik",
+  "onboardingPortalBody": "Arahkan ponselmu ke langit lalu ketuk orb bercahaya. Siang terlipat, bintang-bintang muncul.",
+  "onboardingDrawTitle": "Gambar rasi bintangmu sendiri",
+  "onboardingDrawBody": "Sambungkan lampu-lampu kota menjadi sebuah bentuk, beri nama, dan ia masuk ke koleksimu.",
+  "onboardingCameraTitle": "Constella butuh kameramu",
+  "onboardingCameraBody": "Langit malam digambar di atas apa yang dilihat kameramu. Tidak ada yang direkam dan tidak ada yang keluar dari ponselmu.",
+  "onboardingNext": "Lanjut",
+  "onboardingStart": "Mulai",
+  "onboardingSkip": "Lewati",
+  "renameConstellation": "Ganti nama",
+  "deleteConstellation": "Hapus",
+  "deleteConstellationTitle": "Hapus \"{name}\"?",
+  "deleteConstellationBody": "Bentuk ini dibuang dari koleksimu. Stardust yang sudah didapat tetap tinggal.",
+  "cancel": "Batal"
 }
