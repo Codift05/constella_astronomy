@@ -3,9 +3,9 @@ import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 
+import '../ar/light_finder.dart';
 import '../ar/sky_attitude.dart';
 import '../constellations/constellation_draft.dart';
 import '../constellations/constellation_store.dart';
@@ -13,6 +13,7 @@ import '../focus/focus_session.dart';
 import '../l10n/l10n_ext.dart';
 import '../stardust/stardust_rules.dart';
 import '../stardust/stardust_store.dart';
+import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import '../widgets/constellation_layer.dart';
 import '../widgets/soft_ui.dart';
@@ -47,6 +48,27 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
 
   /// Elevasi saat layar dibuka. Orb dipasang di titik langit ini.
   double? _orbElevation;
+
+  /// Cakrawala terakhir yang dipakai melukis langit.
+  ///
+  /// Pelukis langit adalah pekerjaan termahal di aplikasi: satu saveLayer
+  /// seluruh layar, 520 bintang, dan dua lintasan blur. Ia menggambar ulang
+  /// setiap cakrawala bergeser, dan cakrawala bergeser terus karena ponsel ada
+  /// di tangan. Selama portal membuka, dua pekerjaan berat itu beradu dan
+  /// hasilnya terasa tersendat, jadi nilai ini dibekukan sampai portal diam.
+  double? _frozenHorizon;
+
+  /// Titik cahaya paling terang di bingkai terakhir, dalam koordinat
+  /// pratinjau ternormalisasi.
+  LightSpot? _light;
+
+  /// Aliran bingkai kamera hanya dinyalakan setelah portal terbuka, dan
+  /// hasilnya diperiksa paling cepat empat kali sedetik. Memeriksa tiap frame
+  /// tidak membuat hasilnya lebih baik: lampu kota tidak bergerak secepat itu,
+  /// dan anggaran frame habis untuk hal yang tidak terlihat.
+  static const _scanInterval = Duration(milliseconds: 250);
+  DateTime _lastScan = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _scanning = false;
 
   /// 0 = orb kuncup, 1 = portal penuh layar.
   late final AnimationController _portal = AnimationController.unbounded(
@@ -144,7 +166,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
               l10n.stardustEarned(
                 StardustRules.forFocusSession(session.totalMinutes),
               ),
-              style: AppText.title.copyWith(fontSize: 18),
+              style: AppText.title,
             ),
           ],
         ),
@@ -165,6 +187,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     _portal.dispose();
     _nameController.dispose();
     _camera?.dispose();
+    _stopScanning();
     _attitude.dispose();
     super.dispose();
   }
@@ -242,14 +265,67 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     } else {
       HapticFeedback.lightImpact();
     }
-    _portal.animateWith(
-      SpringSimulation(
-        AppSpring.portal,
-        _portal.value,
-        opening ? 1.0 : 0.0,
-        _portal.velocity,
-      ),
+    springTo(
+      _portal,
+      AppSpring.portal,
+      opening ? 1.0 : 0.0,
+      reduceMotion: context.reduceMotion,
     );
+    opening ? _startScanning() : _stopScanning();
+  }
+
+  /// Membaca bidang kecerahan tiap bingkai untuk mencari sumber cahaya
+  /// ekstrem: bulan, lampu jalan, jendela menyala.
+  ///
+  /// PRD 4.2 meminta node muncul otomatis di sumber cahaya seperti itu. Ini
+  /// setengah jalan ke sana: titiknya ditemukan dan ditandai, penempatan
+  /// nodenya masih diketuk pengguna.
+  void _startScanning() {
+    final camera = _camera;
+    if (camera == null || _scanning) return;
+    _scanning = true;
+    camera.startImageStream(_onFrame).catchError((Object _) {
+      _scanning = false;
+    });
+  }
+
+  void _stopScanning() {
+    final camera = _camera;
+    if (camera == null || !_scanning) return;
+    _scanning = false;
+    camera.stopImageStream().catchError((_) {});
+    if (mounted) setState(() => _light = null);
+  }
+
+  void _onFrame(CameraImage image) {
+    final now = DateTime.now();
+    if (now.difference(_lastScan) < _scanInterval) return;
+    _lastScan = now;
+
+    final plane = image.planes.first;
+    final spot = brightestSpot(
+      plane.bytes,
+      width: image.width,
+      height: image.height,
+      bytesPerRow: plane.bytesPerRow,
+    );
+    if (!mounted) return;
+
+    final mapped = spot == null
+        ? null
+        : LightSpot(
+            position: sensorToPreview(
+              spot.position,
+              sensorOrientation: _camera?.description.sensorOrientation ?? 90,
+            ),
+            intensity: spot.intensity,
+            contrast: spot.contrast,
+          );
+    final moved =
+        mapped == null ||
+        _light == null ||
+        (mapped.position - _light!.position).distance > 0.02;
+    if (moved) setState(() => _light = mapped);
   }
 
   @override
@@ -270,15 +346,12 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                 animation: Listenable.merge([_portal, _attitude]),
                 builder: (context, _) => _PortalLayer(
                   progress: _portal.value,
-                  horizon: _attitude.available
-                      ? horizonY(
-                          elevation: _attitude.elevation,
-                          height: MediaQuery.sizeOf(context).height,
-                        )
-                      : null,
+                  horizon: _horizonForPaint(context),
                 ),
               ),
               if (_state == _CameraState.ready) _drawingLayer(),
+              if (_canDraw && _light != null)
+                _LightBloom(spot: _light!, onTap: _dropNodeAtLight),
               if (_state == _CameraState.ready) _orb(),
               _topBar(),
               if (_session != null) _countdown(),
@@ -327,8 +400,19 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
   /// Lapisan gambar baru menerima sentuhan setelah portal benar-benar diam.
   /// Tanpa ini, ketukan yang membuka portal ikut tercatat sebagai node
   /// begitu lapisan muncul di bawah jari.
-  bool get _canDraw =>
-      _portalOpen && _portal.value >= 0.995 && !_portal.isAnimating;
+  /// Portal sudah cukup lebar untuk digambari.
+  ///
+  /// Dulu syaratnya 0,995 **dan** springnya berhenti berosilasi. Spring portal
+  /// sengaja lambat dengan redaman rendah, jadi ekornya panjang: jari ditolak
+  /// jauh setelah portal terlihat selesai membuka, dan itu terasa seperti
+  /// aplikasi yang tersendat.
+  ///
+  /// `motion.md > Best practices`: "don't make people wait for an animation to
+  /// complete before they can do anything, especially if they have to
+  /// experience the animation more than once."
+  static const _drawableAt = 0.6;
+
+  bool get _canDraw => _portalOpen && _portal.value >= _drawableAt;
 
   Widget _drawingLayer() {
     return AnimatedBuilder(
@@ -368,6 +452,30 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     );
   }
 
+  /// Menaruh node tepat di titik cahaya yang sedang ditandai.
+  void _dropNodeAtLight() {
+    final light = _light;
+    if (light == null) return;
+    final size = MediaQuery.sizeOf(context);
+    HapticFeedback.lightImpact();
+    setState(() {
+      _draft = _draft.addNode(
+        Offset(light.position.dx * size.width, light.position.dy * size.height),
+      );
+    });
+  }
+
+  /// Cakrawala yang dipakai melukis langit, dibekukan selama portal
+  /// beranimasi supaya pelukis tidak menggambar ulang di tengah transisi.
+  double? _horizonForPaint(BuildContext context) {
+    if (!_attitude.available) return null;
+    if (_portal.isAnimating && _frozenHorizon != null) return _frozenHorizon;
+    return _frozenHorizon = horizonY(
+      elevation: _attitude.elevation,
+      height: MediaQuery.sizeOf(context).height,
+    );
+  }
+
   /// Pergeseran tegak orb supaya ia tetap di titik langit yang sama saat
   /// ponsel dimiringkan, bukan menempel di tengah layar.
   ///
@@ -401,7 +509,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
               animation: _portal,
               builder: (context, _) => AnimatedOpacity(
                 opacity: _portal.value > 0.5 ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
+                duration: context.calm(const Duration(milliseconds: 200)),
                 child: _GlassCircleButton(
                   icon: Icons.filter_center_focus_rounded,
                   label: context.l10n.arCloseP,
@@ -506,10 +614,18 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                   horizontal: AppSpace.md,
                   vertical: 10,
                 ),
+                // Keterangan berganti mengikuti keadaan: sebelum portal
+                // dibuka, setelah terbuka, dan saat sebuah sumber cahaya
+                // benar-benar terdeteksi kamera.
                 child: Text(
-                  portalOpen
-                      ? context.l10n.arTapToAddNode
-                      : context.l10n.arOrbHint,
+                  switch ((portalOpen, _light != null)) {
+                    (false, _) => context.l10n.arOrbHint,
+                    (true, true) =>
+                      '${context.l10n.lightCaught} \u00b7 '
+                          '${context.l10n.lightCaughtHint}',
+                    (true, false) => context.l10n.arTapToAddNode,
+                  },
+                  textAlign: TextAlign.center,
                   style: AppText.body.copyWith(color: Colors.white),
                 ),
               );
@@ -612,7 +728,14 @@ class _GlowOrbState extends State<_GlowOrb>
   late final AnimationController _pulse = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 2),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Denyut orb berjalan selamanya; Kurangi Gerak jadi kendali hentinya.
+    holdOrRepeat(_pulse, reduceMotion: context.reduceMotion);
+  }
 
   @override
   void dispose() {
@@ -934,4 +1057,143 @@ class _CameraProblem extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Tanda yang muncul di titik cahaya paling terang yang terbaca kamera.
+///
+/// Tujuannya satu: memberi tahu bahwa aplikasi sudah menemukan sumber cahaya
+/// dan mengundang satu ketukan untuk menaruh node di sana (R-19, gerak harus
+/// punya alasan). Denyutnya lambat supaya tidak bersaing dengan garis rasi
+/// yang sedang digambar.
+class _LightBloom extends StatefulWidget {
+  const _LightBloom({required this.spot, required this.onTap});
+
+  final LightSpot spot;
+  final VoidCallback onTap;
+
+  @override
+  State<_LightBloom> createState() => _LightBloomState();
+}
+
+class _LightBloomState extends State<_LightBloom>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    holdOrRepeat(
+      _pulse,
+      reduceMotion: context.reduceMotion,
+      restingValue: 0.35,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    const box = 132.0;
+    final center = Offset(
+      widget.spot.position.dx * size.width,
+      widget.spot.position.dy * size.height,
+    );
+    // Dijaga agar seluruh kotaknya tetap di dalam layar, supaya label dan
+    // target sentuhnya tidak terpotong di tepi.
+    final left = (center.dx - box / 2).clamp(0.0, size.width - box);
+    final top = (center.dy - box / 2).clamp(0.0, size.height - box);
+
+    return Positioned(
+      left: left,
+      top: top,
+      width: box,
+      height: box,
+      child: Semantics(
+        button: true,
+        label: context.l10n.lightCaughtHint,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: AnimatedBuilder(
+            animation: _pulse,
+            builder: (context, _) => CustomPaint(
+              painter: _BloomPainter(
+                t: _pulse.value,
+                intensity: widget.spot.intensity,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BloomPainter extends CustomPainter {
+  const _BloomPainter({required this.t, required this.intensity});
+
+  /// 0..1, bolak-balik.
+  final double t;
+  final double intensity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final base = size.width * 0.16;
+
+    // Halo lembut yang bernapas.
+    canvas.drawCircle(
+      c,
+      base * (1.9 + 0.5 * t),
+      Paint()
+        ..color = AppNight.accent.withValues(alpha: 0.10 + 0.08 * intensity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
+    );
+
+    // Cincin yang mengembang keluar, seperti riak.
+    canvas.drawCircle(
+      c,
+      base * (1.0 + 1.6 * t),
+      Paint()
+        ..color = AppNight.accent.withValues(alpha: (1 - t) * 0.55)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6,
+    );
+
+    // Empat sinar pendek, panjangnya ikut denyut. Memberi tanda ini bentuk
+    // bintang alih-alih sekadar lingkaran.
+    final ray = Paint()
+      ..color = AppNight.onSurface.withValues(alpha: 0.5 + 0.3 * t)
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round;
+    final inner = base * 0.65;
+    final outer = inner + base * (0.5 + 0.45 * t);
+    for (final d in const [
+      Offset(0, -1),
+      Offset(0, 1),
+      Offset(-1, 0),
+      Offset(1, 0),
+    ]) {
+      canvas.drawLine(c + d * inner, c + d * outer, ray);
+    }
+
+    // Inti padat.
+    canvas.drawCircle(
+      c,
+      base * 0.26,
+      Paint()..color = AppNight.onSurface.withValues(alpha: 0.9),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_BloomPainter old) =>
+      old.t != t || old.intensity != intensity;
 }
