@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import '../stardust/stardust_store.dart';
 import '../theme/tokens.dart';
 import '../widgets/catch_celebration.dart';
 import '../widgets/soft_ui.dart';
+import '../widgets/stat_chips.dart';
 
 enum _Camera { loading, ready, denied, unavailable }
 
@@ -205,45 +207,73 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
         // Tiga kaca di layar ini berbagi satu lintasan backdrop. Tanpa ini
         // setiap kaca memicu saveLayer sendiri di atas umpan kamera yang
         // bergerak terus, tiga kali per frame.
-        body: BackdropGroup(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _cameraLayer(),
-              const _BottomScrim(),
-              if (_ready && _celebrating == null)
-                _Crosshair(locked: _target != null),
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpace.md),
-                  child: _topBar(),
-                ),
-              ),
-              if (_celebrating == null)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpace.md,
-                        0,
-                        AppSpace.md,
-                        kTabBarInset,
-                      ),
-                      child: _panel(),
-                    ),
+        // Tinggi layar diambil dari batasan tata letak, bukan dari MediaQuery.
+        // Keduanya biasanya sama, tapi hanya batasan inilah yang pasti
+        // menggambarkan kotak tempat Stack ini benar-benar digambar.
+        body: LayoutBuilder(
+          builder: (context, layar) => BackdropGroup(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _cameraLayer(),
+                const _BottomScrim(),
+                if (_ready && _celebrating == null)
+                  _Crosshair(locked: _target != null),
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpace.md),
+                    child: _topBar(),
                   ),
                 ),
-              if (_celebrating != null)
-                CatchCelebration(
-                  star: _celebrating!.star,
-                  reward: _celebrating!.reward,
-                  isNew: _celebrating!.isNew,
-                  onClose: () => setState(() => _celebrating = null),
-                ),
-            ],
+                if (_celebrating == null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpace.md,
+                          0,
+                          AppSpace.md,
+                          kTabBarInset,
+                        ),
+                        // Titik bidik ada di tengah layar, karena di situlah
+                        // sumbu lensa kamera berada; memindahkannya berarti
+                        // berbohong soal apa yang sedang dibidik. Maka panelnya
+                        // yang dibatasi: ia tidak boleh naik sampai menyentuh
+                        // titik bidik, dan isinya menggulung kalau tidak muat.
+                        child: LayoutBuilder(
+                          builder: (context, c) {
+                            // Tinggi yang masih sah: dari tepi bawah panel
+                            // sampai batas bawah lingkaran bidik.
+                            final ruang =
+                                c.maxHeight -
+                                layar.maxHeight / 2 -
+                                _crosshairClearance;
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: math.max(_panelMinHeight, ruang),
+                              ),
+                              child: SingleChildScrollView(
+                                reverse: true,
+                                child: _panel(ringkas: ruang < _roomyPanel),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_celebrating != null)
+                  CatchCelebration(
+                    star: _celebrating!.star,
+                    reward: _celebrating!.reward,
+                    isNew: _celebrating!.isNew,
+                    onClose: () => setState(() => _celebrating = null),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -318,7 +348,7 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
     return names[(((azimuth % 360) + 22.5) ~/ 45) % 8];
   }
 
-  Widget _panel() {
+  Widget _panel({bool ringkas = false}) {
     final l10n = context.l10n;
 
     if (_orientation.unsupported) {
@@ -374,6 +404,7 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
           : _StarCard(
               key: ValueKey(hit.star.displayName),
               sighted: hit,
+              ringkas: ringkas,
               separationDeg: _separation,
               alreadyCaught:
                   CaughtStarsScope.maybeOf(
@@ -440,6 +471,19 @@ class _BottomScrim extends StatelessWidget {
     );
   }
 }
+
+/// Ruang yang harus tetap kosong di sekitar titik bidik: jari-jari lingkaran
+/// bidik ditambah jeda nafas. Panel di bawah tidak boleh melewati batas ini.
+const _crosshairClearance = 76.0;
+
+/// Di bawah tinggi ini kartu beralih ke bentuk ringkas. Bentuk penuhnya butuh
+/// sekitar segini untuk nama, chip angka, dan tombolnya.
+const _roomyPanel = 210.0;
+
+/// Kartu ringkas pun perlu ruang sebanyak ini. Layar yang lebih pendek dari
+/// itu memang tidak punya tempat, dan menyembunyikan tombol tangkap lebih
+/// buruk daripada mendekati lingkaran bidik beberapa piksel.
+const _panelMinHeight = 108.0;
 
 class _Crosshair extends StatelessWidget {
   const _Crosshair({required this.locked});
@@ -515,7 +559,14 @@ class _StarCard extends StatelessWidget {
     required this.separationDeg,
     required this.alreadyCaught,
     required this.onCatch,
+    this.ringkas = false,
   });
+
+  /// True saat ruang di bawah lingkaran bidik tidak cukup untuk kartu penuh:
+  /// layar pendek, atau ukuran teks yang diperbesar. Kartunya lalu menyebut
+  /// nama, rasi, dan tombol tangkap saja. Angka-angkanya tetap bisa dilihat
+  /// setelah bintangnya tertangkap.
+  final bool ringkas;
 
   final SightedStar sighted;
   final double separationDeg;
@@ -531,6 +582,55 @@ class _StarCard extends StatelessWidget {
     final l10n = context.l10n;
     final s = sighted.star;
     final alt = sighted.point.altitude;
+
+    if (ringkas) {
+      return GlassCard(
+        tint: AppNight.scrim,
+        grouped: true,
+        padding: const EdgeInsets.all(AppSpace.sm),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    s.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.title.copyWith(color: AppNight.onSurface),
+                  ),
+                  Text(
+                    s.constellationName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.caption.copyWith(color: AppNight.accent),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpace.sm),
+            // Flexible, bukan lebar alami: pada layar sempit dengan ukuran
+            // teks diperbesar, tombol selebar labelnya akan mendorong nama
+            // bintang keluar layar. Di sini labelnya yang menyingkat diri.
+            Flexible(
+              flex: 2,
+              child: PillButton(
+                label: alreadyCaught ? l10n.starAlreadyCaught : l10n.catchStar,
+                color: alreadyCaught ? AppNight.surface : AppNight.accent,
+                labelColor: alreadyCaught
+                    ? AppNight.onSurface
+                    : AppNight.onAccent,
+                onPressed: onCatch,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return GlassCard(
       tint: AppNight.scrim,
       grouped: true,
@@ -557,28 +657,49 @@ class _StarCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 2),
+          // Rasi dan tipe spektral disatukan dalam satu baris. Keduanya
+          // keterangan, bukan angka yang dibandingkan, jadi tidak perlu
+          // sebaris tabel sendiri-sendiri.
           Text(
-            s.constellationName,
+            s.spectral.isEmpty
+                ? s.constellationName
+                : '${s.constellationName}  \u00b7  ${s.spectral}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: AppText.subhead.copyWith(color: AppNight.accent),
           ),
           const SizedBox(height: AppSpace.md),
-          _row(
-            context,
-            l10n.starDistance,
-            s.hasDistance
-                ? l10n.starLightYears(_formatLy(s.lightYears))
-                : l10n.starDistanceUnknown,
+          StatChipRow(
+            // Kunci dipakai supaya chip masuk lagi saat bintang berganti,
+            // bukan sekadar berganti angka diam-diam.
+            key: ValueKey(s.displayName),
+            chips: [
+              (
+                label: l10n.starDistance,
+                value: s.hasDistance
+                    ? l10n.starLightYears(_formatLy(s.lightYears))
+                    : l10n.starDistanceUnknown,
+                tint: StatTint.distance,
+              ),
+              (
+                label: l10n.starMagnitude,
+                value: s.magnitude.toStringAsFixed(2),
+                tint: StatTint.brightness,
+              ),
+              (
+                label: l10n.starAltitude,
+                value: '${alt.round()}\u00b0',
+                tint: StatTint.constellation,
+              ),
+            ],
           ),
-          _row(context, l10n.starMagnitude, s.magnitude.toStringAsFixed(2)),
-          if (s.spectral.isNotEmpty)
-            _row(context, l10n.starSpectralType, s.spectral),
-          _row(
-            context,
-            l10n.starAltitude,
-            alt >= 0
-                ? '${alt.round()}°'
-                : '${alt.round()}° · ${l10n.starBelowHorizon}',
-          ),
+          if (alt < 0) ...[
+            const SizedBox(height: AppSpace.sm),
+            Text(
+              l10n.starBelowHorizon,
+              style: AppText.caption.copyWith(color: AppNight.onSurfaceMuted),
+            ),
+          ],
           const SizedBox(height: AppSpace.md),
           // Mengarahkan hanya memberi pratinjau; menangkap adalah tindakan
           // yang disengaja, dan di situlah perayaannya muncul.
@@ -600,43 +721,6 @@ class _StarCard extends StatelessWidget {
 
   static String _formatLy(double ly) =>
       ly >= 100 ? ly.round().toString() : ly.toStringAsFixed(1);
-
-  Widget _row(BuildContext context, String label, String value) {
-    final labelStyle = AppText.caption.copyWith(color: AppNight.onSurfaceMuted);
-    final valueStyle = AppText.caption.copyWith(color: AppNight.onSurface);
-
-    // Kolom label berlebar tetap patah pada Dynamic Type besar, dan label
-    // Indonesia lebih panjang dari Inggris ("Tipe spektral" lawan "Spectral
-    // type"). Di atas ambang ini label pindah ke atas nilainya.
-    final stacked = MediaQuery.textScalerOf(context).scale(1) > 1.3;
-    if (stacked) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: labelStyle),
-            Text(value, style: valueStyle),
-          ],
-        ),
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Lebarnya mengikuti label terpanjang, bukan angka yang dipatok.
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 150),
-            child: IntrinsicWidth(child: Text(label, style: labelStyle)),
-          ),
-          const SizedBox(width: AppSpace.sm),
-          Expanded(child: Text(value, style: valueStyle)),
-        ],
-      ),
-    );
-  }
 }
 
 /// Panel penjelasan untuk keadaan selain "sedang membidik".

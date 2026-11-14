@@ -7,6 +7,7 @@ import '../l10n/l10n_ext.dart';
 import '../sky/star_catalog.dart';
 import '../theme/motion.dart';
 import '../theme/tokens.dart';
+import 'stat_chips.dart';
 import 'mascot.dart';
 import 'soft_ui.dart';
 
@@ -100,7 +101,28 @@ class CatchCelebration extends StatelessWidget {
                       ).animate().fadeIn(duration: d, delay: d * 0.3),
 
                       const SizedBox(height: AppSpace.lg),
-                      _StatRow(star: star, duration: d),
+                      StatChipRow(
+                        stagger: d,
+                        chips: [
+                          (
+                            label: l10n.statDistance,
+                            value: star.hasDistance
+                                ? '${star.lightYears >= 100 ? star.lightYears.round() : star.lightYears.toStringAsFixed(1)} ly'
+                                : '?',
+                            tint: StatTint.distance,
+                          ),
+                          (
+                            label: l10n.statMagnitude,
+                            value: star.magnitude.toStringAsFixed(2),
+                            tint: StatTint.brightness,
+                          ),
+                          (
+                            label: l10n.statConstellation,
+                            value: star.constellation,
+                            tint: StatTint.constellation,
+                          ),
+                        ],
+                      ),
 
                       const SizedBox(height: AppSpace.xl),
                       SizedBox(
@@ -132,115 +154,6 @@ class CatchCelebration extends StatelessWidget {
 }
 
 /// Tiga kartu data berdampingan, masuk satu per satu.
-class _StatRow extends StatelessWidget {
-  const _StatRow({required this.star, required this.duration});
-
-  final Star star;
-  final Duration duration;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final cards = <({String label, String value, Color tint})>[
-      (
-        label: l10n.statDistance,
-        value: star.hasDistance
-            ? '${star.lightYears >= 100 ? star.lightYears.round() : star.lightYears.toStringAsFixed(1)} ly'
-            : '?',
-        tint: const Color(0xFF8FB8FF),
-      ),
-      (
-        label: l10n.statMagnitude,
-        value: star.magnitude.toStringAsFixed(2),
-        tint: const Color(0xFF9BE59B),
-      ),
-      (
-        label: l10n.statConstellation,
-        value: star.constellation,
-        tint: const Color(0xFFBFC6FF),
-      ),
-    ];
-
-    return Row(
-      children: [
-        for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(width: AppSpace.sm),
-          Expanded(
-            child:
-                _StatCard(
-                  label: cards[i].label,
-                  value: cards[i].value,
-                  tint: cards[i].tint,
-                ).animate().scale(
-                  duration: duration,
-                  delay: duration * (0.2 * i),
-                  curve: Curves.easeOutBack,
-                  begin: const Offset(0.7, 0.7),
-                ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.tint,
-  });
-
-  final String label;
-  final String value;
-  final Color tint;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      // Isian pastel polos, tanpa gradasi: revisi 14 November meminta flat 2D.
-      decoration: ShapeDecoration(
-        color: tint.withValues(alpha: 0.18),
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(AppRadius.cardInner),
-          side: BorderSide(color: tint.withValues(alpha: 0.45)),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpace.sm,
-          vertical: 12,
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: AppText.captionSmall.copyWith(color: tint),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: AppText.subhead
-                  .withWeight(FontWeight.w700)
-                  .copyWith(color: AppNight.onSurface),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Percik yang menyembur keluar dari maskot sekali, lalu diam.
-///
-/// Sekali, bukan berulang: perayaan ini layar penuh dan menutup kamera, jadi
-/// percik yang berdenyut terus akan menahan mata lebih lama dari yang pantas.
 class _Sparkles extends StatelessWidget {
   const _Sparkles({required this.child, required this.still});
 

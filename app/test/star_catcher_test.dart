@@ -108,6 +108,12 @@ void main() {
     ObserverLocation? location,
     StarCatalog? catalog,
   }) async {
+    // Ukuran bawaan tes 800x600 bukan ponsel mana pun, dan layar ini hanya
+    // ada di ponsel. Dipakai ukuran iPhone 13, perangkat yang dipakai menguji.
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(Brightness.dark),
@@ -153,9 +159,79 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Sirius'), findsOneWidget);
-    expect(find.text('Canis Major'), findsOneWidget);
+    // Rasi dan tipe spektral berbagi satu baris di kartu ringkas.
+    expect(find.textContaining('Canis Major'), findsOneWidget);
     expect(find.textContaining('8.6'), findsOneWidget);
     expect(find.textContaining('-1.44'), findsOneWidget);
+  });
+
+  group('kartu tidak menutupi titik bidik', () {
+    /// Titik bidik ada di tengah layar karena di situlah sumbu lensa kamera
+    /// berada. Kalau kartu keterangan naik sampai menutupinya, bintang yang
+    /// sedang dibidik justru tidak terlihat — persis keluhan "pointer dan
+    /// keterangannya nabrak" dari pengujian di perangkat.
+    Future<void> periksaTidakBertabrakan(WidgetTester tester) async {
+      final layar = tester.view.physicalSize / tester.view.devicePixelRatio;
+      // Yang diperiksa daerah yang benar-benar ditempati panel di layar,
+      // bukan tinggi alami kartunya: itulah yang bisa menutupi titik bidik.
+      final panel = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('Sirius'),
+              matching: find.byType(SingleChildScrollView),
+            )
+            .first,
+      );
+
+      expect(
+        panel.top,
+        greaterThan(layar.height / 2 + 40),
+        reason: 'panel harus tetap di bawah lingkaran bidik',
+      );
+    }
+
+    testWidgets('pada ponsel dan ukuran teks biasa', (tester) async {
+      final s = starOverhead();
+      await pumpScreen(tester, catalog: StarCatalog([s.star]));
+      await aim(tester, s.altitude, s.azimuth);
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await periksaTidakBertabrakan(tester);
+    });
+
+    testWidgets('pada layar sempit dengan teks 200 persen', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final s = starOverhead();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: MaterialApp(
+            theme: buildAppTheme(Brightness.dark),
+            localizationsDelegates: AppL10n.localizationsDelegates,
+            supportedLocales: AppL10n.supportedLocales,
+            locale: const Locale('en'),
+            home: StarCatcherScreen(
+              orientation: orientation,
+              location: ObserverLocation.at(lat, lon),
+              catalog: StarCatalog([s.star]),
+              enableCamera: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await aim(tester, s.altitude, s.azimuth);
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // Teks dua kali lipat membuat kartunya jauh lebih tinggi daripada ruang
+      // yang tersedia; yang dijamin bukan "selalu muat", melainkan "tidak
+      // pernah melewati titik bidik". Sisanya menggulung.
+      await periksaTidakBertabrakan(tester);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   testWidgets('membidik langit kosong mengatakan tidak ada bintang terang', (
