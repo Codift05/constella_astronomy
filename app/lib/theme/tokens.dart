@@ -44,10 +44,38 @@ abstract final class AppSpace {
 }
 
 abstract final class AppFont {
-  /// SF Pro Rounded hanya tersedia di iOS. Android jatuh ke fallback sistem
-  /// sampai pengganti berlisensi dipilih — lihat docs/06-open-questions.md #7.
-  static const rounded = '.SF Pro Rounded';
-  static const display = '.SF Pro Display';
+  /// Nunito, dibundel sebagai variable font.
+  ///
+  /// Menjawab [open questions #7](../../../docs/06-open-questions.md): SF Pro
+  /// Rounded hanya ada di iOS, jadi Android selama ini jatuh ke font sistem
+  /// dan tampilannya berbeda antar perangkat. Satu font untuk keduanya
+  /// membuat aplikasinya terlihat sama di mana pun.
+  ///
+  /// Lisensinya SIL OFL, dan berkas lisensinya ikut dibundel.
+  static const rounded = 'Nunito';
+  static const display = 'Nunito';
+}
+
+/// Membentuk gaya teks dengan bobot yang benar-benar terpakai.
+///
+/// Nunito di sini adalah **variable font**: satu berkas memuat seluruh rentang
+/// bobot pada sumbu `wght`. `fontWeight` saja tidak menggerakkan sumbu itu,
+/// jadi setiap gaya juga membawa [FontVariation] yang cocok. Tanpa ini semua
+/// teks akan tampil pada satu bobot yang sama.
+TextStyle _nunito({
+  required double size,
+  required double lineHeight,
+  required FontWeight weight,
+  double? letterSpacing,
+}) {
+  return TextStyle(
+    fontFamily: AppFont.rounded,
+    fontSize: size,
+    height: lineHeight / size,
+    fontWeight: weight,
+    fontVariations: [FontVariation('wght', weight.value.toDouble())],
+    letterSpacing: letterSpacing,
+  );
 }
 
 /// Spring physics untuk semua transisi. Tidak ada kurva linear yang
@@ -68,77 +96,80 @@ abstract final class AppSpring {
 /// melayani tema terang dan gelap sekaligus.
 abstract final class AppText {
   /// Large Title — 34/41 (typography.md > iOS Dynamic Type, Large).
-  static const largeTitle = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 34,
-    height: 41 / 34,
-    fontWeight: FontWeight.w700,
+  static final largeTitle = _nunito(
+    size: 34,
+    lineHeight: 41,
+    weight: FontWeight.w800,
     letterSpacing: -0.6,
   );
 
   /// Title 2 — 22/28.
-  static const title2 = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 22,
-    height: 28 / 22,
-    fontWeight: FontWeight.w700,
+  static final title2 = _nunito(
+    size: 22,
+    lineHeight: 28,
+    weight: FontWeight.w800,
     letterSpacing: -0.4,
   );
 
   /// Title 3 — 20/25.
-  static const title = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 20,
-    height: 25 / 20,
-    fontWeight: FontWeight.w700,
+  static final title = _nunito(
+    size: 20,
+    lineHeight: 25,
+    weight: FontWeight.w700,
     letterSpacing: -0.3,
   );
 
-  static const numeral = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 56,
-    fontWeight: FontWeight.w700,
+  static final numeral = _nunito(
+    size: 56,
+    lineHeight: 56,
+    weight: FontWeight.w800,
     letterSpacing: -2,
-    height: 1,
   );
 
   /// Body — 17/22. Ukuran default iOS; nilai lama 15 pt itu Subhead.
-  static const body = TextStyle(
-    fontFamily: AppFont.display,
-    fontSize: 17,
-    height: 22 / 17,
-    fontWeight: FontWeight.w500,
+  static final body = _nunito(
+    size: 17,
+    lineHeight: 22,
+    weight: FontWeight.w500,
   );
 
   /// Subhead — 15/20. Untuk label sekunder di dalam kartu.
-  static const subhead = TextStyle(
-    fontFamily: AppFont.display,
-    fontSize: 15,
-    height: 20 / 15,
-    fontWeight: FontWeight.w500,
+  static final subhead = _nunito(
+    size: 15,
+    lineHeight: 20,
+    weight: FontWeight.w500,
   );
 
   /// Footnote — 13/18.
-  static const caption = TextStyle(
-    fontFamily: AppFont.display,
-    fontSize: 13,
-    height: 18 / 13,
-    fontWeight: FontWeight.w500,
+  static final caption = _nunito(
+    size: 13,
+    lineHeight: 18,
+    weight: FontWeight.w500,
   );
 
   /// Caption 2 — 11/13. Batas bawah yang diizinkan iOS; hanya untuk label tab.
-  static const captionSmall = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 11,
-    height: 13 / 11,
-    fontWeight: FontWeight.w600,
+  static final captionSmall = _nunito(
+    size: 11,
+    lineHeight: 13,
+    weight: FontWeight.w600,
   );
 
-  static const button = TextStyle(
-    fontFamily: AppFont.rounded,
-    fontSize: 17,
-    height: 22 / 17,
-    fontWeight: FontWeight.w600,
+  static final button = _nunito(
+    size: 17,
+    lineHeight: 22,
+    weight: FontWeight.w700,
+  );
+}
+
+/// Mengubah ketebalan teks pada variable font.
+///
+/// `copyWith(fontWeight: ...)` saja **tidak cukup**: sumbu `wght` Nunito tetap
+/// di nilai lama, jadi teksnya terlihat sama saja. Ini mengubah keduanya
+/// sekaligus.
+extension VariableWeight on TextStyle {
+  TextStyle withWeight(FontWeight weight) => copyWith(
+    fontWeight: weight,
+    fontVariations: [FontVariation('wght', weight.value.toDouble())],
   );
 }
 

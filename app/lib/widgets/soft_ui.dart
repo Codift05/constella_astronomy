@@ -260,12 +260,12 @@ class SoftChip extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppText.subhead.copyWith(
-                  fontFamily: AppFont.rounded,
-                  fontWeight: FontWeight.w600,
-                  // Putih di atas pastel hanya 2.01:1. Teks gelap = 8.77:1.
-                  color: selected ? p.chipSelectedText : p.textSecondary,
-                ),
+                style: AppText.subhead
+                    .withWeight(FontWeight.w600)
+                    .copyWith(
+                      // Putih di atas pastel hanya 2.01:1. Teks gelap = 8.77:1.
+                      color: selected ? p.chipSelectedText : p.textSecondary,
+                    ),
               ),
             ),
           ],
