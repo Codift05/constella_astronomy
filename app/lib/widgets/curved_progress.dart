@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/motion.dart';
 import '../theme/tokens.dart';
+import 'entrance.dart';
 
 /// Progress bar melengkung untuk Stardust Energy (PRD §4.4 "Status Bar":
 /// "indikator pengumpulan poin eksplorasi dengan progress bar melengkung").
@@ -58,7 +59,10 @@ class CurvedProgressBar extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(label, style: p.numeral.copyWith(fontSize: 40)),
+                      CountUpText(
+                        value: int.tryParse(label) ?? 0,
+                        style: p.numeral.copyWith(fontSize: 40),
+                      ),
                       if (caption != null) ...[
                         const SizedBox(height: AppSpace.xs),
                         Text(

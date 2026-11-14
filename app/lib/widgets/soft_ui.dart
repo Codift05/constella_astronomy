@@ -39,8 +39,18 @@ class _SpringTapState extends State<SpringTap>
     super.dispose();
   }
 
+  /// Menekan dan melepas memakai pegas yang berbeda, dan itu disengaja.
+  ///
+  /// Menekan harus terasa seketika mengikuti jari, jadi pegasnya kaku dan
+  /// nyaris tanpa lenting. Melepas adalah saat tombol "menjawab", dan di situ
+  /// lentingan kecil melewati ukuran asal membuatnya terasa punya bobot.
   void _springTo(double target) {
-    springTo(_c, AppSpring.press, target, reduceMotion: context.reduceMotion);
+    springTo(
+      _c,
+      target < 1 ? AppSpring.press : AppSpring.bouncy,
+      target,
+      reduceMotion: context.reduceMotion,
+    );
   }
 
   @override

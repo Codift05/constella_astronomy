@@ -90,13 +90,7 @@ class _AppTabBarState<T> extends State<AppTabBar<T>>
                     width: slotWidth,
                     child: child!,
                   ),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: ShapeDecoration(
-                      color: context.palette.accentWash,
-                      shape: const StadiumBorder(),
-                    ),
-                  ),
+                  child: _Indicator(slide: _slide),
                 ),
                 Row(
                   children: [
@@ -118,6 +112,41 @@ class _AppTabBarState<T> extends State<AppTabBar<T>>
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// Kapsul penanda tab aktif.
+///
+/// Ia memanjang sedikit ke arah perpindahan selagi meluncur, lalu kembali ke
+/// bentuk semula setelah sampai. Peregangan itu yang membuat perpindahan
+/// terbaca sebagai satu benda yang bergerak, bukan kotak yang pindah tempat.
+class _Indicator extends StatelessWidget {
+  const _Indicator({required this.slide});
+
+  final AnimationController slide;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: slide,
+      builder: (context, child) {
+        // Kecepatan diubah jadi peregangan, dibatasi supaya kapsulnya tidak
+        // pernah tampak meleleh.
+        final stretch = (slide.velocity.abs() * 0.045).clamp(0.0, 0.22);
+        return Transform.scale(
+          scaleX: 1 + stretch,
+          scaleY: 1 - stretch * 0.35,
+          child: child,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: ShapeDecoration(
+          color: context.palette.accentWash,
+          shape: const StadiumBorder(),
         ),
       ),
     );
@@ -182,11 +211,13 @@ class _TabItem extends StatelessWidget {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(end: selected ? 1 : 0),
-                duration: context.calm(const Duration(milliseconds: 240)),
-                curve: Curves.easeOutCubic,
+                duration: context.calm(const Duration(milliseconds: 420)),
+                // Memantul sedikit saat terpilih: tab yang baru dipilih
+                // menjawab sentuhan, bukan sekadar berganti warna.
+                curve: context.calmCurve(Curves.easeOutBack),
                 builder: (context, t, child) => Transform.translate(
-                  offset: Offset(0, -2 * t),
-                  child: child,
+                  offset: Offset(0, -3 * t),
+                  child: Transform.scale(scale: 1 + 0.18 * t, child: child),
                 ),
                 child: Icon(icon, size: 22, color: color),
               ),

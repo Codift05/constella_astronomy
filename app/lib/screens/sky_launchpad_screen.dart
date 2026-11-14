@@ -5,6 +5,7 @@ import '../l10n/l10n_ext.dart';
 import '../stardust/stardust_store.dart';
 import '../theme/tokens.dart';
 import '../widgets/curved_progress.dart';
+import '../widgets/entrance.dart';
 import '../widgets/mascot.dart';
 import '../widgets/soft_ui.dart';
 import '../widgets/theme_toggle.dart';
@@ -33,44 +34,55 @@ class SkyLaunchpadScreen extends StatelessWidget {
             kTabBarInset,
           ),
           children: [
-            _Greeting(stardust: stardust.energy),
-            const SizedBox(height: AppSpace.md),
-            const _PortalHero(),
-            const SizedBox(height: AppSpace.md),
-            PillButton(
-              label: l10n.enterCosmicNight,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const CosmicNightScreen()),
-              ),
+            EntranceList(
+              children: [
+                _Greeting(stardust: stardust.energy),
+                const SizedBox(height: AppSpace.md),
+                const _PortalHero(),
+                const SizedBox(height: AppSpace.md),
+                PillButton(
+                  label: l10n.enterCosmicNight,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CosmicNightScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpace.sm),
+                // Menyebut masalah yang dipecahkan, bukan sekadar cara memakai.
+                // Tanpa kalimat ini tidak ada apa pun di layar yang menjelaskan
+                // untuk apa Malam Kosmik ada.
+                Center(
+                  child: Text(
+                    l10n.cosmicNightPurpose,
+                    textAlign: TextAlign.center,
+                    style: context.palette.caption,
+                  ),
+                ),
+                const SizedBox(height: AppSpace.md),
+                // Pintu masuk kedua ke portal yang sama, kali ini dengan timer.
+                // PRD 4.4 menempatkan sesi fokus sebagai cara masuk Malam Kosmik.
+                PillButton(
+                  label: l10n.focusEntry,
+                  color: context.palette.accentWash,
+                  labelColor: context.palette.textPrimary,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const FocusSessionScreen(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpace.sm),
+                Center(
+                  child: Text(
+                    l10n.focusEntryHint,
+                    style: context.palette.caption,
+                  ),
+                ),
+                const SizedBox(height: AppSpace.lg),
+                const _StardustCard(),
+              ],
             ),
-            const SizedBox(height: AppSpace.sm),
-            // Menyebut masalah yang dipecahkan, bukan sekadar cara memakai.
-            // Tanpa kalimat ini tidak ada apa pun di layar yang menjelaskan
-            // untuk apa Malam Kosmik ada.
-            Center(
-              child: Text(
-                l10n.cosmicNightPurpose,
-                textAlign: TextAlign.center,
-                style: context.palette.caption,
-              ),
-            ),
-            const SizedBox(height: AppSpace.md),
-            // Pintu masuk kedua ke portal yang sama, kali ini dengan timer.
-            // PRD 4.4 menempatkan sesi fokus sebagai cara masuk Malam Kosmik.
-            PillButton(
-              label: l10n.focusEntry,
-              color: context.palette.accentWash,
-              labelColor: context.palette.textPrimary,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const FocusSessionScreen()),
-              ),
-            ),
-            const SizedBox(height: AppSpace.sm),
-            Center(
-              child: Text(l10n.focusEntryHint, style: context.palette.caption),
-            ),
-            const SizedBox(height: AppSpace.lg),
-            const _StardustCard(),
           ],
         ),
       ),

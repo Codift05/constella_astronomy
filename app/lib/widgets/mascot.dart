@@ -33,10 +33,25 @@ class CosmicMascot extends StatefulWidget {
 }
 
 class _CosmicMascotState extends State<CosmicMascot>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _float = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 3),
+  );
+
+  /// Satu putaran penuh berisi satu kedipan di ujungnya. Dibuat begini, bukan
+  /// dengan pewaktu berkala, karena pewaktu tetap hidup setelah layarnya
+  /// ditutup; putaran ini mati bersama widgetnya dan ikut berhenti saat
+  /// Kurangi Gerak menyala.
+  late final AnimationController _blink = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 4200),
+  );
+
+  /// Lompatan sekali jalan saat Lumi disentuh.
+  late final AnimationController _hop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 540),
   );
 
   @override
@@ -46,12 +61,35 @@ class _CosmicMascotState extends State<CosmicMascot>
     // hentinya (R-39). Dipasang di sini, bukan initState, karena MediaQuery
     // baru bisa dibaca setelah dependensi terpasang.
     holdOrRepeat(_float, reduceMotion: context.reduceMotion);
+    if (context.reduceMotion) {
+      if (_blink.isAnimating) _blink.stop();
+      _blink.value = 0;
+    } else if (!_blink.isAnimating) {
+      _blink.repeat();
+    }
   }
 
   @override
   void dispose() {
     _float.dispose();
+    _blink.dispose();
+    _hop.dispose();
     super.dispose();
+  }
+
+  /// Seberapa tertutup mata pada posisi [t] dalam satu putaran.
+  ///
+  /// Nol hampir sepanjang putaran: kedipan yang terlalu sering membuat maskot
+  /// tampak gelisah, bukan hidup.
+  static double _blinkAt(double t) {
+    const mulai = 0.94;
+    if (t < mulai) return 0;
+    return math.sin((t - mulai) / (1 - mulai) * math.pi);
+  }
+
+  void _handleTap() {
+    if (!context.reduceMotion) _hop.forward(from: 0);
+    widget.onTap?.call();
   }
 
   @override
@@ -60,25 +98,42 @@ class _CosmicMascotState extends State<CosmicMascot>
       label: context.l10n.mascotSemanticLabel(mascotName),
       button: widget.onTap != null,
       child: SpringTap(
-        onTap: widget.onTap,
+        onTap: widget.onTap == null ? null : _handleTap,
         pressedScale: 0.92,
         haptic: HapticFeedback.selectionClick,
         child: AnimatedBuilder(
-          animation: _float,
+          animation: Listenable.merge([_float, _hop]),
           builder: (_, child) {
             final t = Curves.easeInOut.transform(_float.value);
+            // Lompatan naik lalu turun dalam satu busur, dan badannya memipih
+            // sesaat di awal — pipih sebelum melompat itulah yang membuat
+            // lompatan terbaca sebagai tenaga, bukan sekadar geser ke atas.
+            final hop = math.sin(_hop.value * math.pi);
+            final squash = _hop.isAnimating
+                ? math.sin(_hop.value * math.pi * 2)
+                : 0.0;
             return Transform.translate(
-              offset: Offset(0, -8 * t),
-              child: Transform.rotate(angle: (t - 0.5) * 0.05, child: child),
+              offset: Offset(0, -8 * t - 22 * hop),
+              child: Transform.rotate(
+                angle: (t - 0.5) * 0.05,
+                child: Transform.scale(
+                  scaleX: 1 + 0.06 * squash.clamp(-1.0, 0.0).abs(),
+                  scaleY: 1 - 0.06 * squash.clamp(-1.0, 0.0).abs() + 0.05 * hop,
+                  child: child,
+                ),
+              ),
             );
           },
-          // Maskot hanya ditransformasi, tidak digambar ulang tiap frame.
+          // Hanya mata yang digambar ulang saat berkedip; sisanya cuma
+          // ditransformasi.
           child: RepaintBoundary(
-            child: CustomPaint(
-              size: Size(widget.size, widget.size),
-              painter: _MascotPainter(),
-              isComplex: true,
-              willChange: false,
+            child: AnimatedBuilder(
+              animation: _blink,
+              builder: (_, _) => CustomPaint(
+                size: Size(widget.size, widget.size),
+                painter: _MascotPainter(blink: _blinkAt(_blink.value)),
+                isComplex: true,
+              ),
             ),
           ),
         ),
@@ -88,6 +143,11 @@ class _CosmicMascotState extends State<CosmicMascot>
 }
 
 class _MascotPainter extends CustomPainter {
+  const _MascotPainter({this.blink = 0});
+
+  /// 0 mata terbuka, 1 mata tertutup penuh.
+  final double blink;
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
@@ -124,21 +184,30 @@ class _MascotPainter extends CustomPainter {
     // Mata.
     final eyeWhite = Paint()..color = Colors.white;
     final pupil = Paint()..color = const Color(0xFF0A192F);
+    // Kelopak menutup dari atas dan bawah sekaligus, jadi yang mengecil
+    // tingginya, bukan seluruh matanya.
+    final open = 1 - 0.92 * blink;
     for (final dx in [0.36, 0.64]) {
       final c = Offset(w * dx, h * 0.52);
       canvas.drawOval(
-        Rect.fromCenter(center: c, width: w * 0.20, height: h * 0.24),
+        Rect.fromCenter(center: c, width: w * 0.20, height: h * 0.24 * open),
         eyeWhite,
       );
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: c.translate(0, h * 0.02),
-          width: w * 0.12,
-          height: h * 0.15,
-        ),
-        pupil,
-      );
-      canvas.drawCircle(c.translate(-w * 0.03, -h * 0.03), w * 0.025, eyeWhite);
+      if (open > 0.35) {
+        canvas.drawOval(
+          Rect.fromCenter(
+            center: c.translate(0, h * 0.02 * open),
+            width: w * 0.12,
+            height: h * 0.15 * open,
+          ),
+          pupil,
+        );
+        canvas.drawCircle(
+          c.translate(-w * 0.03, -h * 0.03 * open),
+          w * 0.025,
+          eyeWhite,
+        );
+      }
     }
 
     // Senyum.
@@ -160,7 +229,7 @@ class _MascotPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_MascotPainter oldDelegate) => false;
+  bool shouldRepaint(_MascotPainter old) => old.blink != blink;
 }
 
 /// Balon ucapan maskot untuk onboarding.

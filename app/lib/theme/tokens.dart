@@ -87,6 +87,12 @@ abstract final class AppSpring {
   /// Pop-up dan bottom sheet: cepat, overshoot kecil.
   static const popup = SpringDescription(mass: 1, stiffness: 420, damping: 28);
 
+  /// Lepas tekan: kembali ke ukuran asal sambil melewatinya sedikit, lalu
+  /// menetap. Inilah yang membuat tombol terasa hidup, bukan sekadar mengecil
+  /// dan membesar lagi. Overshoot-nya di bawah lima persen, jadi tombol tidak
+  /// pernah menabrak tetangganya.
+  static const bouncy = SpringDescription(mass: 1, stiffness: 600, damping: 18);
+
   /// Portal AR: lambat, overshoot terlihat, megah.
   static const portal = SpringDescription(mass: 2, stiffness: 180, damping: 22);
 }
