@@ -173,5 +173,18 @@
     }
   },
   "deleteConstellationBody": "This shape is removed from your collection. Stardust already earned stays.",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "appearanceSystem": "Follow system",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark",
+  "appearanceLabel": "Appearance: {mode}",
+  "@appearanceLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "arCameraRetry": "Try again",
+  "arCameraDeniedHint": "If the prompt no longer appears, turn the camera on in Settings › Apps › Constella › Permissions."
 }
