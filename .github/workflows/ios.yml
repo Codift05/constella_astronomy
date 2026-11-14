@@ -24,6 +24,9 @@ jobs:
   build:
     runs-on: macos-15
     timeout-minutes: 40
+    # Dibutuhkan untuk menerbitkan .ipa sebagai aset release.
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -75,3 +78,18 @@ jobs:
           path: app/constella-unsigned.ipa
           if-no-files-found: error
           retention-days: 14
+
+      # Dijalankan saat dipicu tag. Artifact biasa butuh token API untuk
+      # diunduh; aset release di repo publik bisa diambil langsung dengan
+      # curl, sehingga pemasangan ke iPhone bisa berjalan tanpa campur tangan.
+      - name: Terbitkan .ipa sebagai release
+        if: startsWith(github.ref, 'refs/tags/ios-')
+        working-directory: app
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" constella-unsigned.ipa \
+            --title "Constella iOS $GITHUB_REF_NAME" \
+            --notes "Build tanpa tanda tangan dari commit $GITHUB_SHA.
+          Pasang dengan: xtool install constella-unsigned.ipa"
+
