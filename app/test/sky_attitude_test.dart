@@ -53,14 +53,13 @@ void main() {
       expect(horizonY(elevation: 0, height: h), closeTo(h / 2, 1e-9));
     });
 
-    test('menengadah setengah bidang pandang, cakrawala jatuh ke tepi bawah',
-        () {
-      // Bidang pandang bawaan 65 derajat, jadi setengahnya 32,5.
-      expect(
-        horizonY(elevation: deg(32.5), height: h),
-        closeTo(h, 1e-6),
-      );
-    });
+    test(
+      'menengadah setengah bidang pandang, cakrawala jatuh ke tepi bawah',
+      () {
+        // Bidang pandang bawaan 65 derajat, jadi setengahnya 32,5.
+        expect(horizonY(elevation: deg(32.5), height: h), closeTo(h, 1e-6));
+      },
+    );
 
     test('menengadah lebih jauh, cakrawala keluar bingkai bawah', () {
       // Seluruh bingkai berisi langit.
@@ -90,9 +89,16 @@ void main() {
     });
 
     test('bidang pandang lebih sempit menggeser cakrawala lebih jauh', () {
-      final wide = horizonY(elevation: deg(20), height: h, verticalFov: deg(90));
-      final narrow =
-          horizonY(elevation: deg(20), height: h, verticalFov: deg(40));
+      final wide = horizonY(
+        elevation: deg(20),
+        height: h,
+        verticalFov: deg(90),
+      );
+      final narrow = horizonY(
+        elevation: deg(20),
+        height: h,
+        verticalFov: deg(40),
+      );
       expect(narrow, greaterThan(wide));
     });
   });
