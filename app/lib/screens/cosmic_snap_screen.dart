@@ -78,9 +78,14 @@ class CosmicSnapScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: PillButton(
-                      label: l10n.snapShare,
-                      onPressed: () => _share(context),
+                    // Builder supaya tombolnya punya context sendiri. Di iPad
+                    // lembar bagikan muncul sebagai popover, dan popover harus
+                    // tahu dari kotak mana ia keluar.
+                    child: Builder(
+                      builder: (buttonContext) => PillButton(
+                        label: l10n.snapShare,
+                        onPressed: () => _share(buttonContext),
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpace.sm),
@@ -101,16 +106,48 @@ class CosmicSnapScreen extends StatelessWidget {
     );
   }
 
+  /// Menulis potret ke berkas sementara, lalu menyerahkannya ke lembar bagikan
+  /// bawaan sistem bersama kalimat keterangannya.
+  ///
+  /// [context] harus milik tombolnya, bukan layarnya. Di iPhone lembar itu
+  /// naik dari bawah dan asalnya tidak ditanya, tapi di iPad ia popover yang
+  /// harus menunjuk ke sesuatu; tanpa kotak asal, permintaannya berakhir
+  /// sebagai galat dan tidak ada lembar yang terbuka.
   Future<void> _share(BuildContext context) async {
     final caption = snapCaption(context, snap);
-    final dir = await getTemporaryDirectory();
-    final file = File(
-      '${dir.path}/constella-${snap.takenAt.millisecondsSinceEpoch}.png',
-    );
-    await file.writeAsBytes(snap.image);
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], text: caption),
-    );
+    final messenger = ScaffoldMessenger.of(context);
+    final p = context.palette;
+    final failed = context.l10n.snapFailed;
+    final box = context.findRenderObject() as RenderBox?;
+
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/constella-${snap.takenAt.millisecondsSinceEpoch}.png',
+      );
+      await file.writeAsBytes(snap.image);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: caption,
+          sharePositionOrigin: box == null
+              ? null
+              : box.localToGlobal(Offset.zero) & box.size,
+        ),
+      );
+    } catch (_) {
+      // Menulis berkas bisa gagal saat penyimpanan penuh, dan lembar bagikan
+      // bisa ditolak sistem. Keduanya bukan alasan untuk menjatuhkan layar.
+      messenger.showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: p.backgroundPrimary,
+          shape: const StadiumBorder(),
+          margin: const EdgeInsets.all(AppSpace.md),
+          content: Text(failed, style: p.body),
+        ),
+      );
+    }
   }
 }
 
