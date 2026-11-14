@@ -100,6 +100,8 @@ class _ConstellationPainter extends CustomPainter {
   });
 
   final ConstellationDraft draft;
+
+  /// Pangkal dan ujung garis yang sedang ditarik jari.
   final Offset? dragFrom;
   final Offset? dragTo;
 
@@ -123,15 +125,35 @@ class _ConstellationPainter extends CustomPainter {
     }
 
     // Garis yang sedang ditarik jari, belum terkunci ke node mana pun.
-    if (dragFrom != null && dragTo != null) {
+    //
+    // Digambar sebagai komet: ekornya memudar ke belakang dan kepalanya
+    // bercahaya di ujung jari. Bukan hiasan, ini menunjukkan ke arah mana
+    // garis sedang ditarik, yang penting saat beberapa node berdekatan.
+    final from = dragFrom, to = dragTo;
+    if (from != null && to != null) {
+      final tail = Rect.fromPoints(from, to).inflate(1);
       canvas.drawLine(
-        dragFrom!,
-        dragTo!,
+        from,
+        to,
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.6)
-          ..strokeWidth = 2
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [_neon.withValues(alpha: 0), _neon.withValues(alpha: 0.85)],
+          ).createShader(tail)
+          ..strokeWidth = 2.5
           ..strokeCap = StrokeCap.round,
       );
+
+      // Kepala komet: inti padat dengan pendar di sekelilingnya.
+      canvas.drawCircle(
+        to,
+        9,
+        Paint()
+          ..color = _neon.withValues(alpha: 0.55)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
+      canvas.drawCircle(to, 3.5, Paint()..color = Colors.white);
     }
 
     for (final node in draft.nodes) {

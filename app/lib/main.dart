@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'ar/camera_warmup.dart';
 import 'constellations/constellation_store.dart';
 import 'sky/caught_stars_store.dart';
 import 'data/app_database.dart';
@@ -18,6 +19,8 @@ import 'theme/tokens.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   startFrameReport();
+  // Daftar kamera dihangatkan sejak awal; sensornya tidak.
+  CameraWarmup.start();
 
   // Database dibuka dan dibaca sebelum frame pertama, supaya layar tidak
   // sempat menampilkan nol lalu melompat ke angka sebenarnya.

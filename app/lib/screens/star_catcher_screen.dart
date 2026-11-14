@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/l10n_ext.dart';
+import '../ar/camera_warmup.dart';
 import '../sky/caught_stars_store.dart';
 import '../sky/observer_location.dart';
 import '../sky/sky_math.dart';
@@ -113,7 +114,7 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
 
   Future<void> _startCamera() async {
     try {
-      final cameras = await availableCameras().timeout(_cameraTimeout);
+      final cameras = await CameraWarmup.cameras().timeout(_cameraTimeout);
       if (cameras.isEmpty) {
         if (mounted) setState(() => _cameraState = _Camera.unavailable);
         return;

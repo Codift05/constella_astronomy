@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../ar/camera_warmup.dart';
 import '../ar/light_finder.dart';
 import '../ar/sky_attitude.dart';
 import '../constellations/constellation_draft.dart';
@@ -15,7 +16,10 @@ import '../stardust/stardust_rules.dart';
 import '../stardust/stardust_store.dart';
 import '../theme/motion.dart';
 import '../theme/tokens.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../widgets/mascot.dart';
 import '../widgets/constellation_layer.dart';
+import '../widgets/stardust_burst.dart';
 import '../widgets/soft_ui.dart';
 
 /// Fitur 4.1 — AR Time-Bubble. Portal spasial yang menimpa tangkapan kamera
@@ -69,6 +73,10 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
   static const _scanInterval = Duration(milliseconds: 250);
   DateTime _lastScan = DateTime.fromMillisecondsSinceEpoch(0);
   bool _scanning = false;
+
+  /// Titik pusat semburan debu bintang saat sebuah rasi selesai disimpan.
+  /// Null saat tidak ada semburan yang sedang berjalan.
+  Offset? _burstAt;
 
   /// 0 = orb kuncup, 1 = portal penuh layar.
   late final AnimationController _portal = AnimationController.unbounded(
@@ -211,7 +219,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
 
   Future<void> _startCamera() async {
     try {
-      final cameras = await availableCameras().timeout(_cameraTimeout);
+      final cameras = await CameraWarmup.cameras().timeout(_cameraTimeout);
       if (cameras.isEmpty) {
         if (mounted) setState(() => _state = _CameraState.unavailable);
         return;
@@ -356,6 +364,17 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
               _topBar(),
               if (_session != null) _countdown(),
               _bottomPanel(),
+              // PRD 4.2: ledakan partikel saat rasi selesai, dan maskot
+              // bersorak. Muncul sekali lalu hilang sendiri.
+              if (_burstAt != null) ...[
+                StardustBurst(
+                  origin: _burstAt!,
+                  onDone: () {
+                    if (mounted) setState(() => _burstAt = null);
+                  },
+                ),
+                const _CheeringMascot(),
+              ],
             ],
           ),
         ),
@@ -450,6 +469,16 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
         );
       },
     );
+  }
+
+  /// Titik tengah sebuah bentuk, dipakai sebagai pusat semburan.
+  static Offset? _centroidOf(ConstellationDraft draft) {
+    if (draft.nodes.isEmpty) return null;
+    var sum = Offset.zero;
+    for (final n in draft.nodes) {
+      sum += n;
+    }
+    return sum / draft.nodes.length.toDouble();
   }
 
   /// Menaruh node tepat di titik cahaya yang sedang ditandai.
@@ -653,11 +682,16 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
         : _nameController.text.trim();
     final reward = StardustRules.forConstellation(draft.edges.length);
 
+    // Pusat bentuknya dihitung sebelum draft dikosongkan: di situlah
+    // semburan debu bintang muncul, tepat di rasi yang baru saja jadi.
+    final centre = _centroidOf(draft);
+
     HapticFeedback.heavyImpact();
     FocusScope.of(context).unfocus();
     setState(() {
       _draft = const ConstellationDraft();
       _nameController.clear();
+      _burstAt = centre;
     });
 
     await constellations.add(draft, name);
@@ -1196,4 +1230,34 @@ class _BloomPainter extends CustomPainter {
   @override
   bool shouldRepaint(_BloomPainter old) =>
       old.t != t || old.intensity != intensity;
+}
+
+/// Maskot yang muncul sebentar untuk bersorak saat sebuah rasi selesai.
+///
+/// Melompat masuk dengan pantulan, lalu menghilang bersama semburannya.
+class _CheeringMascot extends StatelessWidget {
+  const _CheeringMascot();
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.reduceMotion) return const SizedBox.shrink();
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 150),
+          child: const CosmicMascot(size: 96)
+              .animate()
+              .scaleXY(
+                begin: 0.2,
+                end: 1,
+                duration: 520.ms,
+                curve: Curves.elasticOut,
+              )
+              .then(delay: 420.ms)
+              .fadeOut(duration: 320.ms),
+        ),
+      ),
+    );
+  }
 }
