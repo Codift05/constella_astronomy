@@ -153,3 +153,72 @@ SkyPoint? lookDirection({
     azimuth: normalize360(_deg(math.atan2(eastComponent, northComponent))),
   );
 }
+
+/// Sebuah arah dalam kerangka dunia timur-utara-atas, panjangnya satu.
+typedef Vec3 = ({double e, double n, double u});
+
+/// Kerangka layar: ke mana kamera memandang, dan ke mana kanan serta atas
+/// layar menunjuk, ketiganya dalam kerangka timur-utara-atas.
+///
+/// [lookDirection] hanya menjawab "menghadap ke mana", dan itu cukup untuk
+/// menyebut satu nama bintang di tengah bidikan. Menggambar langit butuh lebih
+/// dari itu: tanpa tahu ke mana kanan layar menunjuk, bintang tidak bisa
+/// ditaruh di kiri atau kanan tengah layar, dan seluruh gambar ikut berputar
+/// saat ponsel dimiringkan.
+typedef SkyFrame = ({Vec3 forward, Vec3 right, Vec3 up});
+
+/// Arah satuan sebuah titik langit dalam kerangka timur-utara-atas.
+Vec3 unitFromHorizontal(SkyPoint p) {
+  final alt = _rad(p.altitude);
+  final az = _rad(p.azimuth);
+  final cosAlt = math.cos(alt);
+  // Azimut dihitung dari utara ke timur, jadi komponen utara memakai cos.
+  return (e: cosAlt * math.sin(az), n: cosAlt * math.cos(az), u: math.sin(alt));
+}
+
+double dot(Vec3 a, Vec3 b) => a.e * b.e + a.n * b.n + a.u * b.u;
+
+/// Kerangka layar lengkap dari satu pembacaan akselerometer dan magnetometer.
+///
+/// Sumbu perangkat mengikuti kesepakatan Android dan iOS: x ke kanan layar,
+/// y ke atas layar, z keluar menembus layar ke arah pengguna. Kamera belakang
+/// memandang ke arah -z.
+///
+/// Null-nya sama dengan [lookDirection]: perangkat jatuh bebas, atau medan
+/// magnetnya sejajar gravitasi sehingga arah timur tidak terdefinisi.
+SkyFrame? lookFrame({
+  required double ax,
+  required double ay,
+  required double az,
+  required double mx,
+  required double my,
+  required double mz,
+}) {
+  final aLen = math.sqrt(ax * ax + ay * ay + az * az);
+  if (aLen < 1.0) return null;
+  final ux = ax / aLen, uy = ay / aLen, uz = az / aLen;
+
+  var ex = my * uz - mz * uy;
+  var ey = mz * ux - mx * uz;
+  var ez = mx * uy - my * ux;
+  final eLen = math.sqrt(ex * ex + ey * ey + ez * ez);
+  if (eLen < 1e-6) return null;
+  ex /= eLen;
+  ey /= eLen;
+  ez /= eLen;
+
+  // utara = atas x timur
+  final nx = uy * ez - uz * ey;
+  final ny = uz * ex - ux * ez;
+  final nz = ux * ey - uy * ex;
+
+  // Ketiga vektor di atas adalah sumbu dunia dilihat dari kerangka perangkat.
+  // Yang dibutuhkan penggambar adalah kebalikannya: sumbu perangkat dilihat
+  // dari kerangka dunia. Karena rotasinya ortonormal, kebalikan itu cukup
+  // diambil dengan membaca matriksnya menurut kolom, bukan baris.
+  return (
+    forward: (e: -ez, n: -nz, u: -uz),
+    right: (e: ex, n: nx, u: ux),
+    up: (e: ey, n: ny, u: uy),
+  );
+}

@@ -65,7 +65,7 @@ class AppL10nEn extends AppL10n {
       'Open the Cosmic Night, then connect the city lights to draw your first shape.';
 
   @override
-  String get arOrbHint => 'Tap the orb to open the portal';
+  String get arPortalOpening => 'Opening the sky portal…';
 
   @override
   String get arCloseP => 'Close the portal';

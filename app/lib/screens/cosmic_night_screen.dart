@@ -26,6 +26,7 @@ import '../sky/sky_orientation.dart';
 import '../sky/star_catalog.dart';
 import '../sky/view_description.dart';
 import 'cosmic_snap_screen.dart';
+import '../widgets/real_sky_layer.dart';
 import '../widgets/constellation_layer.dart';
 import '../widgets/stardust_burst.dart';
 import '../widgets/soft_ui.dart';
@@ -54,12 +55,14 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
   CameraController? _camera;
   _CameraState _state = _CameraState.loading;
 
-  /// Sudut elevasi kamera. Dipakai untuk menempatkan cakrawala dan menambatkan
-  /// orb ke langit alih-alih ke layar.
+  /// Sudut elevasi kamera dari akselerometer saja.
+  ///
+  /// Tetap ada walau langit kini digambar dari kerangka kompas penuh: potret
+  /// kosmik masih bisa menyebut ketinggian bidikan di ponsel tanpa
+  /// magnetometer, dan di situ akselerometer sendirian sudah cukup.
   late final SkyAttitude _attitude = SkyAttitude()..start();
 
   /// Elevasi saat layar dibuka. Orb dipasang di titik langit ini.
-  double? _orbElevation;
 
   /// Cakrawala terakhir yang dipakai melukis langit.
   ///
@@ -68,7 +71,6 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
   /// setiap cakrawala bergeser, dan cakrawala bergeser terus karena ponsel ada
   /// di tangan. Selama portal membuka, dua pekerjaan berat itu beradu dan
   /// hasilnya terasa tersendat, jadi nilai ini dibekukan sampai portal diam.
-  double? _frozenHorizon;
 
   /// Titik cahaya paling terang di bingkai terakhir, dalam koordinat
   /// pratinjau ternormalisasi.
@@ -105,6 +107,14 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
 
   final _location = ObserverLocation();
   StarCatalog? _catalog;
+
+  /// Seluruh bintang di atas ufuk sekarang, siap digambar.
+  List<SightedStar> _sky = const [];
+
+  /// Langit bergeser seperempat derajat per menit, jadi menghitung ulang tiap
+  /// frame hanya membuang tenaga. Sekali semenit sudah lebih halus daripada
+  /// ketelitian kompas ponsel.
+  Timer? _skyTick;
 
   /// 0 = orb kuncup, 1 = portal penuh layar.
   late final AnimationController _portal = AnimationController.unbounded(
@@ -272,6 +282,10 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
         _camera = controller;
         _state = _CameraState.ready;
       });
+      // Portal dibuka sendiri. Layar ini hanya dimasuki dengan sengaja lewat
+      // tombol "Masuk ke Malam Kosmik", jadi menahannya di balik satu ketukan
+      // lagi tidak menambah apa pun selain langkah.
+      if (!_portalOpen) _openPortal();
     } on CameraException catch (e) {
       if (!mounted) return;
       setState(
@@ -294,28 +308,52 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     }
   }
 
-  void _togglePortal() {
-    final opening = !_portalOpen;
-    setState(() => _portalOpen = opening);
-    if (opening) {
-      _reachedFull = false;
-      HapticFeedback.mediumImpact();
-    } else {
-      HapticFeedback.lightImpact();
-    }
+  void _openPortal() {
+    if (_portalOpen) return;
+    setState(() => _portalOpen = true);
+    _reachedFull = false;
+    HapticFeedback.mediumImpact();
     springTo(
       _portal,
       AppSpring.portal,
-      opening ? 1.0 : 0.0,
+      1.0,
       reduceMotion: context.reduceMotion,
     );
-    opening ? _startScanning() : _stopScanning();
-    if (opening) {
-      // Dimulai sejak portal dibuka, supaya posisinya biasanya sudah ada saat
-      // rana ditekan, tanpa pernah membuat rananya menunggu.
-      if (!_location.hasFix) unawaited(_location.resolve());
-      unawaited(StarCatalog.load().then((c) => _catalog ??= c));
+    _startScanning();
+
+    // Posisi dan katalog dikejar sejak sekarang, supaya langit sudah terisi
+    // saat portalnya selesai melebar, tanpa pernah membuat layar menunggu.
+    if (!_location.hasFix) {
+      unawaited(_location.resolve().then((_) => _refreshSky()));
     }
+    unawaited(
+      StarCatalog.load().then((c) {
+        _catalog ??= c;
+        _refreshSky();
+      }),
+    );
+    _skyTick ??= Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _refreshSky(),
+    );
+  }
+
+  /// Menghitung ulang posisi seluruh bintang untuk tempat dan waktu sekarang.
+  ///
+  /// Tanpa posisi tidak ada yang bisa dihitung: ketinggian sebuah bintang
+  /// bergantung pada lintang pengamat, dan menebaknya berarti menggambar
+  /// langit milik orang lain.
+  void _refreshSky() {
+    final catalog = _catalog;
+    final lat = _location.latitude, lon = _location.longitude;
+    if (!mounted || catalog == null || lat == null || lon == null) return;
+    setState(() {
+      _sky = catalog.snapshot(
+        latitudeDeg: lat,
+        longitudeDeg: lon,
+        utc: DateTime.now().toUtc(),
+      );
+    });
   }
 
   /// Membaca bidang kecerahan tiap bingkai untuk mencari sumber cahaya
@@ -395,10 +433,11 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                   children: [
                     _cameraLayer(),
                     AnimatedBuilder(
-                      animation: Listenable.merge([_portal, _attitude]),
+                      animation: Listenable.merge([_portal, _orientation]),
                       builder: (context, _) => _PortalLayer(
                         progress: _portal.value,
-                        horizon: _horizonForPaint(context),
+                        sky: _sky,
+                        frame: _orientation.frame,
                       ),
                     ),
                     if (_state == _CameraState.ready) _drawingLayer(),
@@ -407,7 +446,6 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                   ],
                 ),
               ),
-              if (_state == _CameraState.ready) _orb(),
               if (_canDraw) _shutter(),
               _topBar(),
               if (_session != null) _countdown(),
@@ -501,30 +539,6 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     );
   }
 
-  Widget _orb() {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_portal, _attitude]),
-      builder: (context, _) {
-        // Orb memudar saat portal melebar.
-        final visible = (1 - _portal.value * 2).clamp(0.0, 1.0);
-        if (visible == 0) return const SizedBox.shrink();
-        _orbElevation ??= _attitude.available ? _attitude.elevation : null;
-        return Center(
-          child: Transform.translate(
-            offset: Offset(0, _orbOffset(context)),
-            child: Opacity(
-              opacity: visible,
-              child: Semantics(
-                button: true,
-                label: context.l10n.arOrbHint,
-                child: _GlowOrb(onTap: _togglePortal),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   /// Tombol rana kapsul, muncul hanya saat portal sudah terbuka.
   Widget _shutter() {
@@ -696,33 +710,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     });
   }
 
-  /// Cakrawala yang dipakai melukis langit, dibekukan selama portal
-  /// beranimasi supaya pelukis tidak menggambar ulang di tengah transisi.
-  double? _horizonForPaint(BuildContext context) {
-    if (!_attitude.available) return null;
-    if (_portal.isAnimating && _frozenHorizon != null) return _frozenHorizon;
-    return _frozenHorizon = horizonY(
-      elevation: _attitude.elevation,
-      height: MediaQuery.sizeOf(context).height,
-    );
-  }
 
-  /// Pergeseran tegak orb supaya ia tetap di titik langit yang sama saat
-  /// ponsel dimiringkan, bukan menempel di tengah layar.
-  ///
-  /// Hanya sumbu tegak yang ditambatkan. Arah mata angin tidak terbaca
-  /// akselerometer, jadi memutar badan tetap membawa orb ikut serta — itu
-  /// batas yang hanya bisa dilewati world tracking AR sungguhan.
-  double _orbOffset(BuildContext context) {
-    final anchor = _orbElevation;
-    if (!_attitude.available || anchor == null) return 0;
-    final height = MediaQuery.sizeOf(context).height;
-    final y = horizonY(elevation: _attitude.elevation - anchor, height: height);
-    // Dibatasi supaya orb selalu bisa dijangkau jari; tanpa ini ia bisa
-    // terbang keluar layar dan portal tidak bisa dibuka lagi.
-    final limit = height * 0.34;
-    return (y - height / 2).clamp(-limit, limit);
-  }
 
   Widget _topBar() {
     return SafeArea(
@@ -734,19 +722,6 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
               icon: Icons.close_rounded,
               label: context.l10n.back,
               onTap: () => Navigator.of(context).maybePop(),
-            ),
-            const Spacer(),
-            AnimatedBuilder(
-              animation: _portal,
-              builder: (context, _) => AnimatedOpacity(
-                opacity: _portal.value > 0.5 ? 1 : 0,
-                duration: context.calm(const Duration(milliseconds: 200)),
-                child: _GlassCircleButton(
-                  icon: Icons.filter_center_focus_rounded,
-                  label: context.l10n.arCloseP,
-                  onTap: _portalOpen ? _togglePortal : null,
-                ),
-              ),
             ),
           ],
         ),
@@ -850,7 +825,7 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                 // benar-benar terdeteksi kamera.
                 child: Text(
                   switch ((portalOpen, _light != null)) {
-                    (false, _) => context.l10n.arOrbHint,
+                    (false, _) => context.l10n.arPortalOpening,
                     (true, true) =>
                       '${context.l10n.lightCaught} \u00b7 '
                           '${context.l10n.lightCaughtHint}',
@@ -950,80 +925,16 @@ class _CountdownAction extends StatelessWidget {
 }
 
 /// Orb bercahaya yang melayang di tengah layar kamera.
-class _GlowOrb extends StatefulWidget {
-  const _GlowOrb({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  State<_GlowOrb> createState() => _GlowOrbState();
-}
-
-class _GlowOrbState extends State<_GlowOrb>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 2),
-  );
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Denyut orb berjalan selamanya; Kurangi Gerak jadi kendali hentinya.
-    holdOrRepeat(_pulse, reduceMotion: context.reduceMotion);
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SpringTap(
-      onTap: widget.onTap,
-      pressedScale: 0.9,
-      haptic: HapticFeedback.mediumImpact,
-      child: AnimatedBuilder(
-        animation: _pulse,
-        builder: (context, child) {
-          final t = Curves.easeInOut.transform(_pulse.value);
-          return Transform.scale(scale: 1 + t * 0.08, child: child);
-        },
-        child: RepaintBoundary(
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(
-                colors: [Colors.white, Color(0xFF8FB8FF), Color(0xFF2F62E8)],
-                stops: [0.0, 0.45, 1.0],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppNight.accent.withValues(alpha: 0.65),
-                  blurRadius: 48,
-                  spreadRadius: 12,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Portal bundar yang melebar dari tengah layar dan memunculkan langit malam.
 class _PortalLayer extends StatelessWidget {
-  const _PortalLayer({required this.progress, this.horizon});
+  const _PortalLayer({
+    required this.progress,
+    required this.sky,
+    required this.frame,
+  });
 
   final double progress;
-
-  /// Null saat perangkat tidak punya akselerometer.
-  final double? horizon;
+  final List<SightedStar> sky;
+  final SkyFrame? frame;
 
   @override
   Widget build(BuildContext context) {
@@ -1031,16 +942,7 @@ class _PortalLayer extends StatelessWidget {
     return IgnorePointer(
       child: ClipPath(
         clipper: _CircleClipper(progress),
-        // 220 bintang + dua blur: mahal digambar, tapi isinya tidak pernah
-        // berubah, jadi biarkan raster cache yang menanganinya.
-        child: RepaintBoundary(
-          child: CustomPaint(
-            painter: _NightSkyPainter(horizon: horizon),
-            isComplex: true,
-            willChange: false,
-            child: const SizedBox.expand(),
-          ),
-        ),
+        child: RealSkyLayer(sky: sky, frame: frame, reveal: progress.clamp(0.0, 1.0)),
       ),
     );
   }
@@ -1066,145 +968,6 @@ class _CircleClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(_CircleClipper oldClipper) =>
       oldClipper.progress != progress;
-}
-
-class _NightSkyPainter extends CustomPainter {
-  const _NightSkyPainter({this.horizon});
-
-  /// Posisi cakrawala dalam piksel dari tepi atas, atau null kalau perangkat
-  /// tidak punya akselerometer. Null berarti seluruh lingkaran portal diisi
-  /// langit, seperti perilaku sebelum sensor dipakai.
-  final double? horizon;
-
-  /// Langit membentang tiga kali tinggi layar ke atas dari cakrawala, supaya
-  /// masih ada bintang saat ponsel diarahkan jauh ke atas.
-  static const _bandFactor = 3.0;
-
-  /// Seed tetap supaya bintang tidak melompat tiap frame.
-  static final _rng = math.Random(20260313);
-  static final List<_Star> _stars = List.generate(
-    520,
-    (_) => _Star(
-      _rng.nextDouble(),
-      _rng.nextDouble(),
-      0.4 + _rng.nextDouble() * 1.6,
-      0.3 + _rng.nextDouble() * 0.7,
-    ),
-  );
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final h = size.height;
-    // Tanpa sensor, cakrawala dianggap di luar bingkai bawah: semua langit.
-    final line = (horizon ?? h * 2).clamp(0.0, h * 2);
-    // Kamera menghadap tanah: tidak ada langit sama sekali.
-    if (line <= 0) {
-      return;
-    }
-
-    final band = h * _bandFactor;
-    final skyTop = line - band;
-
-    // Seluruh langit digambar ke dalam satu lapisan, lalu tepi bawahnya
-    // dihapus dengan gradien supaya pertemuan dengan gedung tidak berupa
-    // garis lurus yang keras.
-    final layer = Rect.fromLTRB(0, 0, size.width, math.min(line, h));
-    canvas.saveLayer(layer, Paint());
-    canvas.save();
-    canvas.clipRect(layer);
-
-    canvas.drawRect(
-      Rect.fromLTRB(0, skyTop, size.width, line),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF040A1F), Color(0xFF0A192F), Color(0xFF13234A)],
-        ).createShader(Rect.fromLTRB(0, skyTop, size.width, line)),
-    );
-
-    // Pita Bima Sakti melintang, ikut tertambat ke langit.
-    canvas.save();
-    canvas.translate(size.width / 2, skyTop + band * 0.58);
-    canvas.rotate(-0.5);
-    canvas.drawRect(
-      Rect.fromCenter(center: Offset.zero, width: size.width * 2, height: 200),
-      Paint()
-        ..shader =
-            const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0x00FFFFFF), Color(0x33A9C7FF), Color(0x00FFFFFF)],
-            ).createShader(
-              Rect.fromCenter(
-                center: Offset.zero,
-                width: size.width * 2,
-                height: 200,
-              ),
-            )
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30),
-    );
-    canvas.restore();
-
-    for (final s in _stars) {
-      canvas.drawCircle(
-        Offset(s.x * size.width, skyTop + s.y * band),
-        s.radius,
-        Paint()..color = Colors.white.withValues(alpha: s.opacity),
-      );
-    }
-
-    // shortcut: tiga planet pada posisi tetap. Ganti dengan ephemeris asli
-    // setelah docs/06-open-questions.md #6 diputuskan.
-    const planets = [
-      (0.22, 0.28, 7.0, Color(0xFFE8C07D)),
-      (0.74, 0.20, 5.0, Color(0xFFE8897D)),
-      (0.58, 0.63, 6.0, Color(0xFFBFD4FF)),
-    ];
-    for (final (x, y, r, color) in planets) {
-      final c = Offset(x * size.width, skyTop + y * band);
-      canvas.drawCircle(
-        c,
-        r * 3,
-        Paint()
-          ..color = color.withValues(alpha: 0.25)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
-      );
-      canvas.drawCircle(c, r, Paint()..color = color);
-    }
-
-    canvas.restore(); // clipRect
-
-    // Pudarkan 90 piksel terakhir tepat di atas cakrawala, supaya langit
-    // menyatu dengan gedung alih-alih terpotong garis lurus.
-    if (line < h) {
-      final fade = Rect.fromLTRB(0, math.max(0, line - 90), size.width, line);
-      canvas.drawRect(
-        fade,
-        Paint()
-          ..blendMode = BlendMode.dstOut
-          ..shader = const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0x00000000), Color(0xFF000000)],
-          ).createShader(fade),
-      );
-    }
-    canvas.restore(); // saveLayer
-  }
-
-  @override
-  bool shouldRepaint(_NightSkyPainter oldDelegate) =>
-      oldDelegate.horizon != horizon;
-}
-
-class _Star {
-  const _Star(this.x, this.y, this.radius, this.opacity);
-
-  final double x;
-  final double y;
-  final double radius;
-  final double opacity;
 }
 
 class _GlassCircleButton extends StatelessWidget {

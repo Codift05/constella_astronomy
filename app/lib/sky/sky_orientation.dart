@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -38,9 +39,16 @@ class SkyOrientation extends ChangeNotifier {
   double? _mx, _my, _mz;
 
   SkyPoint? _direction;
+  SkyFrame? _frame;
 
   /// Arah bidikan sekarang, atau null kalau belum bisa ditentukan.
   SkyPoint? get direction => _direction;
+
+  /// Kerangka layar sekarang: maju, kanan, dan atas dalam koordinat dunia.
+  ///
+  /// Dipakai penggambar langit. Berbeda dari [direction], yang hanya menjawab
+  /// menghadap ke mana dan tidak cukup untuk menaruh bintang di layar.
+  SkyFrame? get frame => _frame;
 
   bool get available => _direction != null;
 
@@ -91,11 +99,21 @@ class SkyOrientation extends ChangeNotifier {
     if (ax == null || ay == null || az == null) return;
     if (mx == null || my == null || mz == null) return;
 
-    final next = lookDirection(ax: ax, ay: ay, az: az, mx: mx, my: my, mz: mz);
-    if (next == null) return;
+    final nextFrame = lookFrame(
+      ax: ax, ay: ay, az: az, mx: mx, my: my, mz: mz,
+    );
+    if (nextFrame == null) return;
+    // Arah bidikan dibaca dari kerangka yang sama, bukan dihitung ulang
+    // sendiri. Dua hitungan terpisah bisa menyimpang, dan nama bintang yang
+    // disebut layar akan meleset dari titik yang digambar.
+    final next = (
+      altitude: _altitudeOf(nextFrame.forward),
+      azimuth: _azimuthOf(nextFrame.forward),
+    );
 
     final first = _direction == null;
     _direction = next;
+    _frame = nextFrame;
     if (first) {
       _settle?.cancel();
       _timedOut = false;
@@ -109,6 +127,12 @@ class SkyOrientation extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  static double _altitudeOf(Vec3 v) =>
+      math.asin(v.u.clamp(-1.0, 1.0)) * 180 / math.pi;
+
+  static double _azimuthOf(Vec3 v) =>
+      normalize360(math.atan2(v.e, v.n) * 180 / math.pi);
 
   @override
   void dispose() {

@@ -63,7 +63,7 @@ class AppL10nId extends AppL10n {
       'Buka Malam Kosmik, lalu sambungkan lampu-lampu kota untuk menggambar bentuk pertamamu.';
 
   @override
-  String get arOrbHint => 'Ketuk orb untuk membuka portal';
+  String get arPortalOpening => 'Membuka portal langit…';
 
   @override
   String get arCloseP => 'Tutup portal';

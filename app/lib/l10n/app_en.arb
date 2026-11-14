@@ -24,7 +24,7 @@
   "constellationsTitle": "Your constellations",
   "constellationsEmptyTitle": "No constellations yet",
   "constellationsEmptyBody": "Open the Cosmic Night, then connect the city lights to draw your first shape.",
-  "arOrbHint": "Tap the orb to open the portal",
+  "arPortalOpening": "Opening the sky portal\u2026",
   "arCloseP": "Close the portal",
   "arPortalOpen": "Portal open",
   "arCameraDenied": "Camera access is needed to open the Cosmic Night.",

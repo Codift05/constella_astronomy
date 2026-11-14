@@ -199,11 +199,11 @@ abstract class AppL10n {
   /// **'Open the Cosmic Night, then connect the city lights to draw your first shape.'**
   String get constellationsEmptyBody;
 
-  /// No description provided for @arOrbHint.
+  /// No description provided for @arPortalOpening.
   ///
   /// In en, this message translates to:
-  /// **'Tap the orb to open the portal'**
-  String get arOrbHint;
+  /// **'Opening the sky portal…'**
+  String get arPortalOpening;
 
   /// No description provided for @arCloseP.
   ///
