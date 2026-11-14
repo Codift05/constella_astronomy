@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 ///   tidak punya tipe JSONB.
 abstract final class AppDatabase {
   static const fileName = 'constella.db';
-  static const version = 2;
+  static const version = 3;
 
   static Future<Database> open({DatabaseFactory? factory, String? path}) async {
     final db = factory ?? databaseFactory;
@@ -60,13 +60,15 @@ abstract final class AppDatabase {
       CREATE TABLE profile (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         stardust_energy INTEGER NOT NULL DEFAULT 0,
-        onboarding_done INTEGER NOT NULL DEFAULT 0
+        onboarding_done INTEGER NOT NULL DEFAULT 0,
+        theme_mode TEXT NOT NULL DEFAULT 'system'
       )
     ''');
     await db.insert('profile', {
       'id': 1,
       'stardust_energy': 0,
       'onboarding_done': 0,
+      'theme_mode': 'system',
     });
   }
 
@@ -75,6 +77,12 @@ abstract final class AppDatabase {
       await db.execute(
         'ALTER TABLE profile ADD COLUMN onboarding_done INTEGER NOT NULL '
         'DEFAULT 0',
+      );
+    }
+    if (from < 3) {
+      await db.execute(
+        "ALTER TABLE profile ADD COLUMN theme_mode TEXT NOT NULL "
+        "DEFAULT 'system'",
       );
     }
   }
