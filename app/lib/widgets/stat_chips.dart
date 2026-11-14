@@ -8,9 +8,9 @@ typedef StatChip = ({String label, String value, Color tint});
 /// Warna chip baku, dipakai berurutan supaya layar mana pun memberi arti yang
 /// sama pada warna yang sama.
 abstract final class StatTint {
-  static const distance = Color(0xFF8FB8FF);
-  static const brightness = Color(0xFF9BE59B);
-  static const constellation = Color(0xFFBFC6FF);
+  static const distance = Color(0xFFAEEED3); // Mint
+  static const brightness = Color(0xFFFFF8B0); // Kuning pucat
+  static const constellation = Color(0xFF7FD6C3); // Teal terang
 }
 
 /// Sebaris chip angka yang masuk satu per satu.

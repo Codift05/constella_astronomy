@@ -156,7 +156,7 @@ class _MascotPainter extends CustomPainter {
     // Isian pastel polos, tanpa gradasi: revisi 15 November meminta flat 2D
     // vector murni. Kedalaman kini datang dari bentuk dan bayangan, bukan
     // dari warna yang melandai.
-    final body = Paint()..color = const Color(0xFF5B9BFF);
+    final body = Paint()..color = const Color(0xFF55A9A0);
 
     // Telinga.
     for (final dx in [0.30, 0.70]) {
@@ -183,7 +183,7 @@ class _MascotPainter extends CustomPainter {
 
     // Mata.
     final eyeWhite = Paint()..color = Colors.white;
-    final pupil = Paint()..color = const Color(0xFF0A192F);
+    final pupil = Paint()..color = const Color(0xFF0C2B28);
     // Kelopak menutup dari atas dan bawah sekaligus, jadi yang mengecil
     // tingginya, bukan seluruh matanya.
     final open = 1 - 0.92 * blink;
@@ -221,7 +221,7 @@ class _MascotPainter extends CustomPainter {
       math.pi,
       false,
       Paint()
-        ..color = const Color(0xFF0A192F)
+        ..color = const Color(0xFF0C2B28)
         ..style = PaintingStyle.stroke
         ..strokeWidth = w * 0.022
         ..strokeCap = StrokeCap.round,

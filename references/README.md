@@ -51,8 +51,39 @@ kepadatan visual. Watermark Xiaohongshu 429589456 ada pada gambar aslinya.
 
 **Yang TIDAK diambil:**
 
-- Palet hijau mint. Constella tetap pada palet biru malamnya; referensi ini
-  dipakai untuk bentuk, kepadatan, dan gerak, bukan untuk warna.
+- Palet hijau mint gambar ini sendiri tidak disalin. Tetapi arah warnanya
+  **ternyata diambil**: pada 15 November 2026 pemilik produk mengirim palet
+  teal-mint terpisah, dan palet itulah yang dipakai. Lihat
+  `ref-03-teal-mint-palette` di bawah.
 - Struktur navigasi dan fiturnya: pemesanan, rute, dan profil tidak ada di
   Constella. Gambar ini menentukan tampilan, bukan fitur maupun navigasi.
 - Ilustrasi manusia bergaya kartun. Maskot Constella satu-satunya karakter.
+
+## ref-03-teal-mint-palette
+
+**Sumber:** dikirim pengguna, 15 November 2026, sebagai tangkapan layar sebuah
+pemilih palet daring. Gambarnya sendiri tidak disimpan di repo karena tidak
+memuat apa pun selain empat petak warna; nilainya yang penting, dan nilai itu
+ditulis di sini supaya tidak hilang.
+
+| Nama | Nilai |
+|---|---|
+| Teal tua | `#287A74` |
+| Teal | `#55A9A0` |
+| Mint | `#AEEED3` |
+| Kuning pucat | `#FFF8B0` |
+
+**Dipakai sebagai acuan untuk:** seluruh palet aplikasi, menggantikan keluarga
+biru-navy. Pemetaan lengkap ke token ada di
+[`../docs/03-design-system.md`](../docs/03-design-system.md) §3.1.
+
+**Yang TIDAK diambil:**
+
+- Dominasi warnanya. Permintaan pengguna tegas: **putih tetap dominan.** Keempat
+  warna ini aksen, bukan cat dinding. `backgroundPrimary` tetap putih murni dan
+  `backgroundSecondary` hanya bersemu mint.
+- Urutan dan proporsi petaknya. Gambar itu pemilih palet, bukan rancangan layar;
+  luas tiap petak di sana tidak berarti apa-apa soal seberapa sering warnanya
+  dipakai.
+- Warna langit di layar AR. Selubung malam dan titik bintang tetap seperti
+  adanya, karena itu warna langit, bukan warna merek.

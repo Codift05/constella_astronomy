@@ -438,3 +438,42 @@ kodenya: emulator ini tidak pernah menyerahkan posisi GPS ke aplikasi, sama
 seperti yang sudah terdokumentasi di `screenshots/12-penangkap-bintang-butuh-lokasi.png`.
 Tanpa posisi, lapisan langit memang sengaja tidak menggambar apa pun. Buktinya
 harus datang dari ponsel fisik.
+
+---
+
+## 7.12 Palet teal-mint — 15 November 2026 dini hari
+
+Permintaan pemilik produk: ganti palet ke teal-mint, **putih tetap dominan**,
+dan catat ke dokumentasi supaya terstruktur.
+
+Seluruh keluarga biru-navy diganti dalam satu langkah, di satu tempat
+(`app/lib/theme/palette.dart` dan `AppNight` di `theme/tokens.dart`). Tidak ada
+warna biru yang tersisa berserakan di widget: pemeriksaan `grep` atas
+`0xFF8FB8FF`, `0xFFBFC6FF`, `0xFF0A192F`, dan `0xFF5B9BFF` di seluruh `lib/`
+hanya menyisakan nol kemunculan setelah maskot dan chip angka ikut diganti.
+
+### Caranya, dan kenapa begitu
+
+Palet dipilih dengan kalkulator kontras **lebih dulu**, bukan dipilih karena
+enak dipandang lalu diperiksa belakangan. Itu mengubah dua nilai sebelum satu
+baris Dart pun ditulis:
+
+| Nilai | Alasan diubah |
+|---|---|
+| `accentWash` dari `#E4F5EC` ke `#E8F7F0` | Teal tua di atasnya hanya 4,50:1 — lolos tipis, tanpa ruang gerak. Jadi 4,60:1 |
+| `textSecondary` teal-kelabu `#4E6B67` | Abu netral lama tidak nyambung dengan teal; ini versi teal yang tetap 5,35:1 di latar layar |
+
+40 pemeriksaan kontras lolos di kedua tema, 261 tes lolos seluruhnya,
+`flutter analyze` bersih.
+
+### Putih dominan, dijaga dua keputusan
+
+1. `backgroundPrimary` tetap `#FFFFFF` murni — kartu adalah permukaan yang
+   paling sering dilihat.
+2. `backgroundSecondary` hanya bersemu mint (`#F2F7F5`), cukup untuk memisahkan
+   latar dari kartu, masih terbaca sebagai putih.
+
+### Yang sengaja tidak ikut diganti
+
+Selubung malam `#040A1F` dan titik bintang putih di lapisan AR. Keduanya warna
+langit, bukan warna merek; mewarnainya teal akan membuat langit berbohong.

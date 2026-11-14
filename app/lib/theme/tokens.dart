@@ -10,15 +10,17 @@ export 'palette.dart' show AppPalette, AppPaletteContext;
 /// adalah umpan kamera atau langit hitam, jadi warnanya tidak boleh ikut
 /// berpindah saat pengguna mengganti tema.
 abstract final class AppNight {
-  static const accent = Color(0xFF8FB8FF);
-  static const neon = Color(0xFF8FD8FF);
-  static const surface = Color(0xFF14284A);
+  static const accent = Color(0xFFAEEED3); // Mint
+  /// Penanda sumber cahaya yang tertangkap kamera. Kuning pucat, karena lampu
+  /// yang ditandainya memang kuning — warnanya menyebut benda, bukan merek.
+  static const neon = Color(0xFFFFF8B0);
+  static const surface = Color(0xFF12302C);
   static const scrim = Color(0x66000000);
   static const scrimLight = Color(0x55000000);
   static const onSurface = Color(0xFFFFFFFF);
   static const onSurfaceMuted = Color(0xB3FFFFFF); // white70
-  /// Label di atas [accent]: 9.48:1.
-  static const onAccent = Color(0xFF08101F);
+  /// Label di atas [accent]: 12.60:1.
+  static const onAccent = Color(0xFF06231F);
 }
 
 abstract final class AppRadius {

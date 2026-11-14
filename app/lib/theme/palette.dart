@@ -112,38 +112,40 @@ class AppPalette extends ThemeExtension<AppPalette> {
   static const light = AppPalette(
     brightness: Brightness.light,
     backgroundPrimary: Color(0xFFFFFFFF),
-    backgroundSecondary: Color(0xFFF4F6F8),
-    accentPrimary: Color(0xFF8FB8FF),
-    accentSecondary: Color(0xFFBFC6FF),
-    // 3.29:1 di latar sekunder, 3.56:1 di kartu putih, 3.11:1 di accentWash.
-    // Nilai lama #5C8EE6 hanya 2.997:1 di latar sekunder — gagal 3:1 di
-    // ikon empty-state dan titik onboarding yang digambar di sana.
-    accentStrong: Color(0xFF5687DC),
-    accentWash: Color(0xFFE8F0FF),
-    controlSurface: Color(0xFFF4F6F8),
-    actionPrimary: Color(0xFF0A192F), // Deep Navy
-    actionPrimaryAlt: Color(0xFF14284A),
-    onAction: Color(0xFFFFFFFF), // 16.25:1 di Navy
-    textPrimary: Color(0xFF0A192F), // 16.25:1 di #F4F6F8
-    textSecondary: Color(0xFF5A6880), // 5.20:1 di #F4F6F8
-    skyTop: Color(0xFF6FA4FF),
-    skyBottom: Color(0xFF3E7BFF),
+    // Putih bersemu mint, bukan abu biru. Cukup untuk memisahkan latar layar
+    // dari kartu putih, dan cukup netral untuk tetap terbaca sebagai putih.
+    backgroundSecondary: Color(0xFFF2F7F5),
+    accentPrimary: Color(0xFFAEEED3), // Mint
+    accentSecondary: Color(0xFFFFF8B0), // Kuning pucat
+    // 4.70:1 di latar sekunder, 5.09:1 di kartu putih, 4.60:1 di accentWash.
+    // Teal tua dipakai langsung sebagai warna ikon bermakna: ia sudah lolos
+    // ambang teks, jadi tidak perlu varian terpisah yang bisa menyimpang.
+    accentStrong: Color(0xFF287A74),
+    accentWash: Color(0xFFE8F7F0),
+    controlSurface: Color(0xFFF2F7F5),
+    actionPrimary: Color(0xFF287A74), // Teal tua
+    actionPrimaryAlt: Color(0xFF55A9A0),
+    onAction: Color(0xFFFFFFFF), // 5.09:1 di teal tua
+    textPrimary: Color(0xFF0C2B28), // 13.94:1 di #F2F7F5
+    textSecondary: Color(0xFF4E6B67), // 5.35:1 di #F2F7F5
+    skyTop: Color(0xFF55A9A0),
+    skyBottom: Color(0xFF287A74),
     cardBorder: null,
     glassTint: Color(0xCCFFFFFF),
     glassBorder: Color(0x33FFFFFF),
     tabBarSurface: Color(0xF7FFFFFF),
-    tabBarBorder: Color(0x14000F2E),
-    heroHaloStart: Color(0xFFDCE9FF),
-    heroHaloEnd: Color(0xFFEFE6FF),
-    chipSelectedBg: Color(0xFF8FB8FF),
-    chipSelectedText: Color(0xFF0A192F), // 8.77:1 di pastel
+    tabBarBorder: Color(0x14052421),
+    heroHaloStart: Color(0xFFD6F5E6),
+    heroHaloEnd: Color(0xFFFFF8D9),
+    chipSelectedBg: Color(0xFFAEEED3),
+    chipSelectedText: Color(0xFF0C2B28), // 11.47:1 di mint
     destructive: Color(0xFFB3261E), // putih 6.54:1
     softShadow: [
-      BoxShadow(color: Color(0x14000F2E), blurRadius: 24, offset: Offset(0, 8)),
+      BoxShadow(color: Color(0x14052421), blurRadius: 24, offset: Offset(0, 8)),
     ],
     liftedShadow: [
       BoxShadow(
-        color: Color(0x1F000F2E),
+        color: Color(0x1F052421),
         blurRadius: 32,
         offset: Offset(0, 14),
       ),
@@ -154,32 +156,32 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    backgroundPrimary: Color(0xFF131C2E), // kartu
-    backgroundSecondary: Color(0xFF070D18), // latar layar
-    accentPrimary: Color(0xFF8FB8FF),
-    accentSecondary: Color(0xFFA9B1FF),
-    accentStrong: Color(0xFF93C0FF), // 10.40:1 di latar, 9.10:1 di kartu
-    accentWash: Color(0xFF1C2942),
-    controlSurface: Color(0xFF1F2C47),
-    // Tombol utama jadi kapsul biru terang berteks gelap. Navy di atas latar
+    backgroundPrimary: Color(0xFF112523), // kartu
+    backgroundSecondary: Color(0xFF06100F), // latar layar
+    accentPrimary: Color(0xFFAEEED3),
+    accentSecondary: Color(0xFFFFF8B0),
+    accentStrong: Color(0xFF7FD6C3), // 11.31:1 di latar, 9.38:1 di kartu
+    accentWash: Color(0xFF16302C),
+    controlSurface: Color(0xFF1B3835),
+    // Tombol utama jadi kapsul mint berteks gelap. Teal tua di atas latar
     // nyaris hitam akan hilang; ini konvensi tinted button iOS di tema gelap.
-    actionPrimary: Color(0xFF8FB8FF),
-    actionPrimaryAlt: Color(0xFFBFC6FF),
-    onAction: Color(0xFF08101F), // 9.48:1 di #8FB8FF
-    textPrimary: Color(0xFFE9EEF8), // 16.72:1 di latar, 14.64:1 di kartu
-    textSecondary: Color(0xFF9AA8C0), // 8.09:1 di latar, 7.08:1 di kartu
-    skyTop: Color(0xFF1B3A7A),
-    skyBottom: Color(0xFF0E2550),
+    actionPrimary: Color(0xFFAEEED3),
+    actionPrimaryAlt: Color(0xFF55A9A0),
+    onAction: Color(0xFF06231F), // 12.60:1 di mint
+    textPrimary: Color(0xFFE6F2EF), // 16.82:1 di latar, 13.95:1 di kartu
+    textSecondary: Color(0xFF93AFAA), // 8.22:1 di latar, 6.82:1 di kartu
+    skyTop: Color(0xFF17443F),
+    skyBottom: Color(0xFF0B2A27),
     cardBorder: Color(0x1FFFFFFF),
-    glassTint: Color(0xD1131C2E),
+    glassTint: Color(0xD1112523),
     glassBorder: Color(0x1FFFFFFF),
-    tabBarSurface: Color(0xF2131C2E),
+    tabBarSurface: Color(0xF2112523),
     tabBarBorder: Color(0x1FFFFFFF),
-    heroHaloStart: Color(0xFF22325C),
-    heroHaloEnd: Color(0xFF2B2550),
-    chipSelectedBg: Color(0xFF2E4878),
-    chipSelectedText: Color(0xFFE9EEF8), // 7.80:1
-    destructive: Color(0xFFC9372C), // putih 5.16:1, 3.77:1 vs latar
+    heroHaloStart: Color(0xFF1C443C),
+    heroHaloEnd: Color(0xFF3A3A22),
+    chipSelectedBg: Color(0xFF1F4541),
+    chipSelectedText: Color(0xFFE6F2EF), // 9.22:1
+    destructive: Color(0xFFC9372C), // putih 5.16:1, 3.73:1 vs latar
     softShadow: [
       BoxShadow(color: Color(0x66000000), blurRadius: 24, offset: Offset(0, 8)),
     ],
