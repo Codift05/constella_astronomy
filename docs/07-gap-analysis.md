@@ -333,3 +333,48 @@ ditulis, supaya kalau gagal bisa dicabut tanpa membuang pekerjaan.
 
 **Pengujian:** 182 tes lolos — 30 matematika langit, 15 katalog, 7 layar
 penangkap bintang, sisanya yang sudah ada. `flutter analyze` bersih.
+
+---
+
+## 7.10 Audit antislop dan Apple HIG — 14 November 2026 malam
+
+Audit penuh dengan skill antislop (mode SESUDAH) dan panduan Apple HIG yang
+dibaca langsung dari berkasnya. Hasilnya **13 temuan**, seluruhnya dikerjakan.
+Laporan lengkap ada di [anti-slop/](../anti-slop/).
+
+### Tiga temuan yang paling berdampak
+
+**Izin gerak iOS hilang.** README `sensors_plus` menyatakan
+`NSMotionUsageDescription` wajib ada di `Info.plist`. Tanpa itu, di iPhone yang
+baru saja dipasangi, kompas penangkap bintang dan cakrawala Malam Kosmik bisa
+tidak pernah menerima data, dan App Review menolak aplikasinya.
+
+**"Kurangi Gerak" tidak dihormati sama sekali.** Padahal aplikasi ini penuh
+spring, maskot melayang, dan kartu meluncur. Sekarang ada satu tuas terpusat di
+`lib/theme/motion.dart` yang dilalui sebelas durasi animasi dan ketiga spring.
+
+**Portal mengunci jari sampai getaran springnya habis.** Syarat lamanya menuntut
+nilai mencapai 0,995 **dan** spring berhenti berosilasi. Spring portal sengaja
+lambat dengan redaman rendah, jadi ekornya panjang: jari ditolak jauh setelah
+portal terlihat selesai membuka. Inilah sumber rasa tersendat saat mengetuk orb.
+Ambangnya kini 0,6 saja.
+
+### Satu bug yang hanya bisa ditemukan dengan mengukur
+
+Deteksi cahaya tidak memicu di emulator. Penelusuran dengan jejak sementara
+menunjukkan bingkainya sehat (1280x720 YUV420) dan kecerahan puncaknya 251,
+jauh di atas ambang. Yang menahannya kontras: **51**, tepat di bawah ambang lama
+55. Adegan emulator memang terang merata, jadi penjaganya bekerja benar.
+
+Tapi angka itu mengajarkan hal lain: 55 terlalu longgar untuk siang hari.
+Ambangnya dinaikkan ke 90 dengan jarak aman di kedua sisi, dan dua tes baru
+mengunci keputusan itu.
+
+### Yang lolos audit tanpa satu temuan pun
+
+Kontras WCAG, target sentuh 44 pt, keadaan kosong dan galat, angka tanpa sumber,
+testimoni palsu, tautan mati, dan tanda pisah em. Layar AR juga sudah benar
+memakai `BackdropGroup`; temuan 5 justru meminta layar baru menirunya.
+
+**Pengujian:** 211 tes lolos, `flutter analyze` bersih, click-through penuh di
+Android 14 tanpa satu galat pun di logcat.

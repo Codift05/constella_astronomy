@@ -128,6 +128,7 @@ malam hari: sinyal sering buruk dan jawabannya harus seketika.
 - [x] Seluruhnya bekerja tanpa jaringan.
 - [x] Izin yang diminta hanya lokasi **perkiraan**, bukan presisi.
 - [x] Perangkat tanpa magnetometer mendapat penjelasan, bukan layar kosong.
+- [x] Layar menjelaskan dirinya sendiri saat belum mengunci bintang.
 - [ ] Penanda posisi bintang digambar di layar, bukan hanya jarak sudutnya.
 - [ ] Planet ikut dikenali, bukan hanya bintang.
 
@@ -139,3 +140,46 @@ malam hari: sinyal sering buruk dan jawabannya harus seketika.
 | Ketelitian kompas ponsel | Magnetometer ponsel mudah terganggu logam dan speaker. Bidikan meleset beberapa derajat adalah hal biasa |
 | Presesi diabaikan | Katalog berpatokan J2000; pergeserannya sekitar 0,4 derajat untuk 2026, jauh di bawah derau kompas |
 | Hanya bintang | Planet bergerak terhadap bintang, jadi perlu perhitungan terpisah yang belum dibangun |
+
+
+---
+
+## 4.6 Deteksi sumber cahaya
+
+**Ditambahkan 14 November 2026.** Setengah jalan menuju kriteria 4.2 "node
+otomatis pada sumber cahaya ekstrem", yang sebelumnya **Belum** sepenuhnya.
+
+**Deskripsi:** selama portal terbuka, aplikasi membaca bidang kecerahan tiap
+bingkai kamera dan mencari titik paling terang. Bulan, lampu jalan, atau jendela
+menyala ditandai halo berdenyut dengan empat sinar. Sekali ketuk menaruh node
+tepat di sana.
+
+### Cara kerjanya
+
+Format YUV420 menaruh kecerahan di bidang pertama, satu byte per piksel, jadi
+tidak ada penguraian warna sama sekali. Pencariannya **mencuplik**: bingkai
+1080p berisi dua juta piksel, dan membacanya tiga puluh kali per detik akan
+menghabiskan anggaran frame. Yang dibaca dibatasi sekitar 3.600 piksel berapa
+pun resolusinya, dan hanya empat kali sedetik.
+
+### Ambangnya diukur, bukan ditebak
+
+Satu titik dianggap sumber cahaya kalau kecerahannya di atas 232 **dan**
+selisihnya terhadap rata-rata bingkai di atas 90.
+
+Syarat kedua yang penting. Tanpanya, langit siang akan dianggap satu lampu
+raksasa. Angkanya diambil dari pengukuran di perangkat:
+
+| Keadaan | Kontras terukur | Hasil |
+|---|---|---|
+| Adegan uji emulator, terang merata | 51 | Ditolak |
+| Pemandangan siang hari | sekitar 60 sampai 90 | Ditolak |
+| Lampu jalan atau bulan di langit malam | 150 ke atas | Diterima |
+
+### Acceptance Criteria
+- [x] Titik cahaya paling terang ditemukan tanpa membaca seluruh piksel.
+- [x] Bingkai terang merata ditolak, bukan dianggap satu sumber cahaya.
+- [x] Koordinat sensor dipetakan benar ke layar untuk keempat orientasi.
+- [x] Sekali ketuk menaruh node tepat di titik itu.
+- [ ] Node muncul sendiri tanpa diketuk, seperti bunyi PRD aslinya.
+- [ ] Lebih dari satu sumber cahaya ditandai sekaligus.
