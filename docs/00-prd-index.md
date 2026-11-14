@@ -22,3 +22,14 @@ Constella adalah aplikasi eksplorasi Augmented Reality yang menimpa dunia nyata 
 | 05 | [Data Models](05-data-models.md) | Skema tabel Supabase/PostgreSQL |
 | 06 | [Open Questions](06-open-questions.md) | Keputusan yang masih terbuka |
 | 07 | [Gap Analysis](07-gap-analysis.md) | PRD vs kode, status 27 kriteria penerimaan |
+
+## Scope MVP
+
+| Fitur | Masuk MVP |
+|---|---|
+| 4.1 AR Time-Bubble (Malam Kosmik) | Ya |
+| 4.2 Skyline Constellations | Ya |
+| 4.3 Astro-Transit (Live Tracking Komet) | Ya |
+| 4.4 Gamification, Mascot & Focus Timer | Ya |
+| Social sharing / feed publik | Tidak — pasca-MVP |
+| Monetisasi / IAP | Tidak — pasca-MVP |
