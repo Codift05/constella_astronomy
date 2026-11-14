@@ -426,4 +426,43 @@ class AppL10nId extends AppL10n {
 
   @override
   String get closeCelebration => 'Lanjut mencari';
+
+  @override
+  String get snapShutter => 'Ambil potret kosmik';
+
+  @override
+  String get snapTitle => 'Potret Kosmik';
+
+  @override
+  String snapFacingStar(String constellation, String degrees) {
+    return 'Menghadap Rasi $constellation, $degrees° di atas ufuk.';
+  }
+
+  @override
+  String snapFacingPlain(String point, String degrees) {
+    return 'Menghadap $point, $degrees° di atas ufuk.';
+  }
+
+  @override
+  String snapBelowHorizon(String point) {
+    return 'Terarah di bawah ufuk, ke arah $point.';
+  }
+
+  @override
+  String snapBrightest(String star, String years) {
+    return 'Paling terang di bingkai: $star, sekitar $years tahun cahaya jauhnya.';
+  }
+
+  @override
+  String get snapNoStar =>
+      'Tidak ada bintang berkatalog yang cukup terang untuk disebut di bingkai ini.';
+
+  @override
+  String get snapShare => 'Bagikan';
+
+  @override
+  String get snapClose => 'Selesai';
+
+  @override
+  String get snapFailed => 'Potretnya gagal diambil. Coba lagi.';
 }

@@ -18,6 +18,14 @@ import '../theme/motion.dart';
 import '../theme/tokens.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../widgets/mascot.dart';
+import 'dart:ui' show ImageByteFormat;
+import 'package:flutter/rendering.dart';
+import '../sky/observer_location.dart';
+import '../sky/sky_math.dart';
+import '../sky/sky_orientation.dart';
+import '../sky/star_catalog.dart';
+import '../sky/view_description.dart';
+import 'cosmic_snap_screen.dart';
 import '../widgets/constellation_layer.dart';
 import '../widgets/stardust_burst.dart';
 import '../widgets/soft_ui.dart';
@@ -77,6 +85,26 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
   /// Titik pusat semburan debu bintang saat sebuah rasi selesai disimpan.
   /// Null saat tidak ada semburan yang sedang berjalan.
   Offset? _burstAt;
+
+  /// Menandai bagian pohon yang ikut terpotret: adegan AR tanpa antarmuka.
+  final _sceneKey = GlobalKey();
+
+  /// Kepekatan kilatan rana, 0 sampai 1.
+  double _flash = 0;
+
+  bool _snapping = false;
+
+  /// Arah bidikan lengkap, termasuk arah mata angin.
+  ///
+  /// Terpisah dari [_attitude] dengan sengaja. Cakrawala hanya butuh tahu mana
+  /// atas, dan itu cukup dari akselerometer, jadi ia tetap bekerja di ponsel
+  /// tanpa kompas. Menyebut nama rasi butuh arah mata angin, yang hanya ada
+  /// kalau magnetometernya ada. Kalau tidak, potretnya tetap jadi, hanya tanpa
+  /// nama rasi.
+  late final SkyOrientation _orientation = SkyOrientation()..start();
+
+  final _location = ObserverLocation();
+  StarCatalog? _catalog;
 
   /// 0 = orb kuncup, 1 = portal penuh layar.
   late final AnimationController _portal = AnimationController.unbounded(
@@ -196,6 +224,8 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
     _nameController.dispose();
     _camera?.dispose();
     _stopScanning();
+    _orientation.dispose();
+    _location.dispose();
     _attitude.dispose();
     super.dispose();
   }
@@ -280,6 +310,12 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
       reduceMotion: context.reduceMotion,
     );
     opening ? _startScanning() : _stopScanning();
+    if (opening) {
+      // Dimulai sejak portal dibuka, supaya posisinya biasanya sudah ada saat
+      // rana ditekan, tanpa pernah membuat rananya menunggu.
+      if (!_location.hasFix) unawaited(_location.resolve());
+      unawaited(StarCatalog.load().then((c) => _catalog ??= c));
+    }
   }
 
   /// Membaca bidang kecerahan tiap bingkai untuk mencari sumber cahaya
@@ -349,18 +385,30 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              _cameraLayer(),
-              AnimatedBuilder(
-                animation: Listenable.merge([_portal, _attitude]),
-                builder: (context, _) => _PortalLayer(
-                  progress: _portal.value,
-                  horizon: _horizonForPaint(context),
+              // Hanya adegannya yang masuk ke dalam batas ini. Tombol dan
+              // petunjuk sengaja di luar, supaya potret kosmik berisi langit
+              // dan rasi saja, bukan antarmukanya.
+              RepaintBoundary(
+                key: _sceneKey,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _cameraLayer(),
+                    AnimatedBuilder(
+                      animation: Listenable.merge([_portal, _attitude]),
+                      builder: (context, _) => _PortalLayer(
+                        progress: _portal.value,
+                        horizon: _horizonForPaint(context),
+                      ),
+                    ),
+                    if (_state == _CameraState.ready) _drawingLayer(),
+                    if (_canDraw && _light != null)
+                      _LightBloom(spot: _light!, onTap: _dropNodeAtLight),
+                  ],
                 ),
               ),
-              if (_state == _CameraState.ready) _drawingLayer(),
-              if (_canDraw && _light != null)
-                _LightBloom(spot: _light!, onTap: _dropNodeAtLight),
               if (_state == _CameraState.ready) _orb(),
+              if (_canDraw) _shutter(),
               _topBar(),
               if (_session != null) _countdown(),
               _bottomPanel(),
@@ -375,6 +423,13 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
                 ),
                 const _CheeringMascot(),
               ],
+              // Kilatan rana, di lapisan paling atas supaya menutupi semuanya.
+              if (_flash > 0)
+                IgnorePointer(
+                  child: ColoredBox(
+                    color: Colors.white.withValues(alpha: _flash),
+                  ),
+                ),
             ],
           ),
         ),
@@ -469,6 +524,153 @@ class _CosmicNightScreenState extends State<CosmicNightScreen>
         );
       },
     );
+  }
+
+  /// Tombol rana kapsul, muncul hanya saat portal sudah terbuka.
+  Widget _shutter() {
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 96),
+          child: Semantics(
+            button: true,
+            label: context.l10n.snapShutter,
+            excludeSemantics: true,
+            child: SpringTap(
+              onTap: _snapping ? null : _takeSnap,
+              pressedScale: 0.9,
+              haptic: HapticFeedback.mediumImpact,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpace.lg,
+                  vertical: 12,
+                ),
+                constraints: const BoxConstraints(minHeight: kMinTapTarget),
+                decoration: ShapeDecoration(
+                  color: AppNight.accent,
+                  shape: const StadiumBorder(),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 20,
+                      color: AppNight.onAccent,
+                    ),
+                    const SizedBox(width: AppSpace.sm),
+                    Text(
+                      context.l10n.snapTitle,
+                      style: AppText.button.copyWith(color: AppNight.onAccent),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Mengambil potret kosmik: menangkap adegannya, lalu membingkainya bersama
+  /// data arah, ketinggian, waktu, dan bintang yang benar-benar ada di sana.
+  Future<void> _takeSnap() async {
+    if (_snapping) return;
+    setState(() => _snapping = true);
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = context.l10n.snapFailed;
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    try {
+      await _flashOnce();
+      final boundary =
+          _sceneKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (boundary == null) throw StateError('adegan belum terpasang');
+
+      final image = await boundary.toImage(pixelRatio: pixelRatio);
+      final data = await image.toByteData(format: ImageByteFormat.png);
+      image.dispose();
+      if (data == null) throw StateError('encoding gagal');
+      if (!mounted) return;
+
+      final snap = CosmicSnap(
+        image: data.buffer.asUint8List(),
+        takenAt: DateTime.now(),
+        view: describeView(look: _lookNow(), sky: await _skyNow()),
+        latitude: _location.latitude,
+        longitude: _location.longitude,
+      );
+      unawaited(
+        navigator.push(
+          MaterialPageRoute(builder: (_) => CosmicSnapScreen(snap: snap)),
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppNight.surface,
+            shape: const StadiumBorder(),
+            margin: const EdgeInsets.all(AppSpace.md),
+            content: Text(
+              failed,
+              style: AppText.body.copyWith(color: AppNight.onSurface),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _snapping = false);
+    }
+  }
+
+  /// Arah bidikan sekarang. Kalau kompasnya tidak ada, hanya ketinggian yang
+  /// diketahui dan azimutnya nol; keterangan potret menyesuaikan sendiri.
+  SkyPoint _lookNow() {
+    final dir = _orientation.direction;
+    if (dir != null) return dir;
+    return (
+      altitude: _attitude.available ? _attitude.elevation * 57.29578 : 0.0,
+      azimuth: 0.0,
+    );
+  }
+
+  /// Posisi seluruh bintang di langit saat ini, untuk menamai rasi di dalam
+  /// bingkai.
+  ///
+  /// **Tidak pernah menunggu GPS.** Rana kamera harus terasa seketika; menunggu
+  /// penentuan posisi bisa memakan belasan detik di dalam ruangan, dan potret
+  /// yang baru muncul setelah itu sudah bukan potret momen yang dimaksud. Kalau
+  /// posisinya belum ada, potretnya tetap jadi tanpa nama rasi, dan pencarian
+  /// posisi berjalan di latar untuk potret berikutnya.
+  Future<List<SightedStar>> _skyNow() async {
+    final lat = _location.latitude, lon = _location.longitude;
+    if (lat == null || lon == null) {
+      unawaited(_location.resolve());
+      return const [];
+    }
+    final catalog = _catalog ??= await StarCatalog.load();
+    return catalog.snapshot(
+      latitudeDeg: lat,
+      longitudeDeg: lon,
+      utc: DateTime.now().toUtc(),
+    );
+  }
+
+  /// Kilatan putih singkat, seperti rana kamera sungguhan.
+  Future<void> _flashOnce() async {
+    if (context.reduceMotion) return;
+    setState(() => _flash = 0.85);
+    await Future<void>.delayed(const Duration(milliseconds: 70));
+    if (!mounted) return;
+    setState(() => _flash = 0);
+    await Future<void>.delayed(const Duration(milliseconds: 40));
   }
 
   /// Titik tengah sebuah bentuk, dipakai sebagai pusat semburan.

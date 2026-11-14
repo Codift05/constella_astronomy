@@ -154,5 +154,52 @@
       }
     }
   },
-  "closeCelebration": "Lanjut mencari"
+  "closeCelebration": "Lanjut mencari",
+  "snapShutter": "Ambil potret kosmik",
+  "snapTitle": "Potret Kosmik",
+  "snapFacingStar": "Menghadap Rasi {constellation}, {degrees}° di atas ufuk.",
+  "@snapFacingStar": {
+    "placeholders": {
+      "constellation": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "snapFacingPlain": "Menghadap {point}, {degrees}° di atas ufuk.",
+  "@snapFacingPlain": {
+    "placeholders": {
+      "point": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "snapBelowHorizon": "Terarah di bawah ufuk, ke arah {point}.",
+  "@snapBelowHorizon": {
+    "placeholders": {
+      "point": {
+        "type": "String"
+      }
+    }
+  },
+  "snapBrightest": "Paling terang di bingkai: {star}, sekitar {years} tahun cahaya jauhnya.",
+  "@snapBrightest": {
+    "placeholders": {
+      "star": {
+        "type": "String"
+      },
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "snapNoStar": "Tidak ada bintang berkatalog yang cukup terang untuk disebut di bingkai ini.",
+  "snapShare": "Bagikan",
+  "snapClose": "Selesai",
+  "snapFailed": "Potretnya gagal diambil. Coba lagi."
 }

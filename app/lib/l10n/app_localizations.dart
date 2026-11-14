@@ -816,6 +816,66 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Keep looking'**
   String get closeCelebration;
+
+  /// No description provided for @snapShutter.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a cosmic snap'**
+  String get snapShutter;
+
+  /// No description provided for @snapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cosmic Snap'**
+  String get snapTitle;
+
+  /// No description provided for @snapFacingStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Facing {constellation}, {degrees}° above the horizon.'**
+  String snapFacingStar(String constellation, String degrees);
+
+  /// No description provided for @snapFacingPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Facing {point}, {degrees}° above the horizon.'**
+  String snapFacingPlain(String point, String degrees);
+
+  /// No description provided for @snapBelowHorizon.
+  ///
+  /// In en, this message translates to:
+  /// **'Pointed below the horizon, toward {point}.'**
+  String snapBelowHorizon(String point);
+
+  /// No description provided for @snapBrightest.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightest in frame: {star}, about {years} light years away.'**
+  String snapBrightest(String star, String years);
+
+  /// No description provided for @snapNoStar.
+  ///
+  /// In en, this message translates to:
+  /// **'No catalogued star bright enough to name in this frame.'**
+  String get snapNoStar;
+
+  /// No description provided for @snapShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get snapShare;
+
+  /// No description provided for @snapClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get snapClose;
+
+  /// No description provided for @snapFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The snap could not be taken. Try again.'**
+  String get snapFailed;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

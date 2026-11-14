@@ -254,5 +254,52 @@
       }
     }
   },
-  "closeCelebration": "Keep looking"
+  "closeCelebration": "Keep looking",
+  "snapShutter": "Take a cosmic snap",
+  "snapTitle": "Cosmic Snap",
+  "snapFacingStar": "Facing {constellation}, {degrees}° above the horizon.",
+  "@snapFacingStar": {
+    "placeholders": {
+      "constellation": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "snapFacingPlain": "Facing {point}, {degrees}° above the horizon.",
+  "@snapFacingPlain": {
+    "placeholders": {
+      "point": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "snapBelowHorizon": "Pointed below the horizon, toward {point}.",
+  "@snapBelowHorizon": {
+    "placeholders": {
+      "point": {
+        "type": "String"
+      }
+    }
+  },
+  "snapBrightest": "Brightest in frame: {star}, about {years} light years away.",
+  "@snapBrightest": {
+    "placeholders": {
+      "star": {
+        "type": "String"
+      },
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "snapNoStar": "No catalogued star bright enough to name in this frame.",
+  "snapShare": "Share",
+  "snapClose": "Done",
+  "snapFailed": "The snap could not be taken. Try again."
 }

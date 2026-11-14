@@ -428,4 +428,43 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get closeCelebration => 'Keep looking';
+
+  @override
+  String get snapShutter => 'Take a cosmic snap';
+
+  @override
+  String get snapTitle => 'Cosmic Snap';
+
+  @override
+  String snapFacingStar(String constellation, String degrees) {
+    return 'Facing $constellation, $degrees° above the horizon.';
+  }
+
+  @override
+  String snapFacingPlain(String point, String degrees) {
+    return 'Facing $point, $degrees° above the horizon.';
+  }
+
+  @override
+  String snapBelowHorizon(String point) {
+    return 'Pointed below the horizon, toward $point.';
+  }
+
+  @override
+  String snapBrightest(String star, String years) {
+    return 'Brightest in frame: $star, about $years light years away.';
+  }
+
+  @override
+  String get snapNoStar =>
+      'No catalogued star bright enough to name in this frame.';
+
+  @override
+  String get snapShare => 'Share';
+
+  @override
+  String get snapClose => 'Done';
+
+  @override
+  String get snapFailed => 'The snap could not be taken. Try again.';
 }
