@@ -14,3 +14,11 @@ dist/
 .vscode/
 *.iml
 .DS_Store
+
+# Rahasia. Jangan pernah masuk repo.
+*.keystore
+*.jks
+key.properties
+app/ios/Runner/GoogleService-Info.plist
+*.p12
+*.mobileprovision
