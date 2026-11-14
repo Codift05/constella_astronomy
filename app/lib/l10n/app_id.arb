@@ -73,5 +73,18 @@
   "deleteConstellation": "Hapus",
   "deleteConstellationTitle": "Hapus \"{name}\"?",
   "deleteConstellationBody": "Bentuk ini dibuang dari koleksimu. Stardust yang sudah didapat tetap tinggal.",
-  "cancel": "Batal"
+  "cancel": "Batal",
+  "appearanceSystem": "Ikut sistem",
+  "appearanceLight": "Terang",
+  "appearanceDark": "Gelap",
+  "appearanceLabel": "Tampilan: {mode}",
+  "@appearanceLabel": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "arCameraRetry": "Coba lagi",
+  "arCameraDeniedHint": "Kalau dialog izinnya tidak muncul lagi, nyalakan kamera di Setelan › Aplikasi › Constella › Izin."
 }
