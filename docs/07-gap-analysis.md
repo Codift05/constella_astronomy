@@ -97,3 +97,52 @@ Belum ada satu baris pun. Yang dibutuhkan:
 | Timer akurat saat aplikasi di background | **Selesai** | Sisa waktu dihitung dari jam dinding, bukan akumulasi tick. 8 unit test di `focus_session_test.dart` |
 
 ---
+
+## 7.3 Bagian PRD di luar daftar kriteria
+
+| PRD | Status | Catatan |
+|---|---|---|
+| §2 Backend Golang (Gin/Fiber) | **Belum** | Tidak ada folder backend sama sekali |
+| §2 Supabase + PostgreSQL + Auth | **Ditunda, skema siap** | Keputusan 14 Nov: lokal dulu. `db/001_init.sql` berisi tabel, indeks, RLS, dan fungsi `award_stardust`; sudah diuji parse terhadap PostgreSQL 16 asli |
+| §3 SF Pro Rounded / Display | **Sebagian** | Hanya resolve di iOS. Android jatuh ke font sistem — [#7](06-open-questions.md) belum dijawab |
+| §3 Frosted glass di semua kartu | **Sebagian, disengaja** | Dipakai di layar AR dengan `BackdropGroup`. Dicabut dari tab bar karena terukur memakan 10 ms di frame terburuk |
+| §3 Squircle & kapsul | **Selesai** | `RoundedSuperellipseBorder` + `StadiumBorder` |
+| §3 Haptic di setiap interaksi | **Selesai** | `SpringTap` membawa haptic ke semua elemen yang bisa ditekan |
+| §3 Spring di semua transisi | **Selesai** | Tidak ada `Curves.linear` yang terlihat pengguna |
+| §5 Tabel `users` | **Padanan lokal** | Tabel `profile` satu baris memegang `stardust_energy`. Tanpa `user_id` sampai auth ada |
+| §5 Tabel `constellations` | **Selesai lokal** | Tabel SQLite dengan indeks `(created_at DESC, id DESC)` untuk paginasi keyset |
+| §5 Tabel `focus_sessions` | **Selesai lokal** | Ditulis saat sesi tuntas |
+
+## 7.4 Di luar PRD, tapi akan menagih
+
+| Hal | Kenapa penting |
+|---|---|
+| Manajemen state | Masih `setState` per layar. `_stardust` sudah terduplikasi di dua file — gejala awal |
+| Jalan ke Pengaturan saat izin ditolak permanen | Onboarding sudah menjelaskan sebelum izin diminta, tapi kalau pengguna menolak permanen belum ada tombol menuju Pengaturan |
+| Kebijakan privasi | Kamera + GPS selalu aktif ([#15](06-open-questions.md)) |
+| Nama & desain maskot sendiri | "Nova" masih placeholder ([#17](06-open-questions.md)) |
+
+---
+
+## 7.5 Urutan kerja yang disarankan
+
+Diurutkan menurut apa yang membuka jalan bagi yang lain, bukan menurut besarnya.
+
+| # | Pekerjaan | Membuka | Terhalang oleh |
+|---|---|---|---|
+| ~~1~~ | ~~Timer hitung mundur~~ | — | **Selesai 14 Nov** |
+| ~~2~~ | ~~Penyimpanan lokal + onboarding~~ | — | **Selesai 14 Nov** |
+| ~~3~~ | ~~Dark mode~~ | — | **Selesai 14 Nov** |
+| 1 | **Jawab open questions #1–#6** | 5 kriteria AR | Keputusan produk, bukan kode |
+| 2 | **Manajemen state terpusat** | Menghentikan duplikasi `_stardust` sebelum menyebar | Tidak ada |
+| 3 | **Jalan ke Pengaturan saat izin ditolak permanen** | AR bisa dipulihkan tanpa reinstall | Tidak ada |
+| 4 | **AR sungguhan (ARKit/ARCore)** | 4.1 dan 4.2 sepenuhnya | #1–#4 |
+| 5 | **Backend Golang + Supabase** | 4.3, sinkron antar perangkat | Pilihan API radar (#5) |
+| 6 | **Astro-Transit** | — | #6, #7, GPS |
+| 7 | **Lo-fi player** | — | Lisensi musik (#16) |
+| 8 | **Maskot 3D** | — | Desain karakter (#17) |
+
+Nomor 2 dan 3 adalah satu-satunya pekerjaan yang **tidak terhalang apa pun**. Sisanya menunggu
+keputusan produk, bukan menunggu kode.
+
+---
