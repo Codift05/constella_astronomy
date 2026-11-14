@@ -143,5 +143,35 @@
         "type": "int"
       }
     }
-  }
+  },
+  "onboardingWelcomeTitle": "Hello, I am {name}",
+  "@onboardingWelcomeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingWelcomeBody": "I will keep you company while you explore the sky above your city.",
+  "onboardingPortalTitle": "Open the Cosmic Night",
+  "onboardingPortalBody": "Point your phone at the sky and tap the glowing orb. Daylight folds away and the stars come through.",
+  "onboardingDrawTitle": "Draw your own constellations",
+  "onboardingDrawBody": "Connect the city lights into a shape, give it a name, and it joins your collection.",
+  "onboardingCameraTitle": "Constella needs your camera",
+  "onboardingCameraBody": "The night sky is drawn over what your camera sees. Nothing is recorded and nothing leaves your phone.",
+  "onboardingNext": "Next",
+  "onboardingStart": "Let's go",
+  "onboardingSkip": "Skip",
+  "renameConstellation": "Rename",
+  "deleteConstellation": "Delete",
+  "deleteConstellationTitle": "Delete \"{name}\"?",
+  "@deleteConstellationTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConstellationBody": "This shape is removed from your collection. Stardust already earned stays.",
+  "cancel": "Cancel"
 }
