@@ -576,6 +576,150 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'If the prompt no longer appears, turn the camera on in Settings › Apps › Constella › Permissions.'**
   String get arCameraDeniedHint;
+
+  /// No description provided for @focusEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a focus session'**
+  String get focusEntry;
+
+  /// No description provided for @focusEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus while the cosmos keeps you company'**
+  String get focusEntryHint;
+
+  /// No description provided for @tabStars.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars'**
+  String get tabStars;
+
+  /// No description provided for @starAimHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the crosshair at a star'**
+  String get starAimHint;
+
+  /// No description provided for @starSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the sky…'**
+  String get starSearching;
+
+  /// No description provided for @starNothingHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No bright star in the crosshair'**
+  String get starNothingHere;
+
+  /// No description provided for @starNothingHereBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Move slowly. Only stars down to magnitude 5 are in the catalogue.'**
+  String get starNothingHereBody;
+
+  /// No description provided for @starOffBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{deg}° from centre'**
+  String starOffBy(String deg);
+
+  /// No description provided for @starMagnitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Magnitude'**
+  String get starMagnitude;
+
+  /// No description provided for @starDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get starDistance;
+
+  /// No description provided for @starLightYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} light years'**
+  String starLightYears(String value);
+
+  /// No description provided for @starDistanceUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not known'**
+  String get starDistanceUnknown;
+
+  /// No description provided for @starSpectralType.
+  ///
+  /// In en, this message translates to:
+  /// **'Spectral type'**
+  String get starSpectralType;
+
+  /// No description provided for @starConstellation.
+  ///
+  /// In en, this message translates to:
+  /// **'Constellation'**
+  String get starConstellation;
+
+  /// No description provided for @starAltitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Altitude'**
+  String get starAltitude;
+
+  /// No description provided for @starNeedsLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Constella needs your rough location'**
+  String get starNeedsLocationTitle;
+
+  /// No description provided for @starNeedsLocationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Which stars are above you depends on where you stand. Approximate location is enough — Constella never asks for precise location, and nothing is stored or sent anywhere.'**
+  String get starNeedsLocationBody;
+
+  /// No description provided for @starAllowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location'**
+  String get starAllowLocation;
+
+  /// No description provided for @starLocationDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Without location, Constella cannot tell which stars are up.'**
+  String get starLocationDenied;
+
+  /// No description provided for @starLocationServiceOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is switched off on this phone.'**
+  String get starLocationServiceOff;
+
+  /// No description provided for @starOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get starOpenSettings;
+
+  /// No description provided for @starNoCompass.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone has no compass'**
+  String get starNoCompass;
+
+  /// No description provided for @starNoCompassBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Identifying a star needs a magnetometer to know which way you are facing. This device does not report one.'**
+  String get starNoCompassBody;
+
+  /// No description provided for @starBelowHorizon.
+  ///
+  /// In en, this message translates to:
+  /// **'below the horizon'**
+  String get starBelowHorizon;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

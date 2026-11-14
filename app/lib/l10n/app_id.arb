@@ -86,5 +86,43 @@
     }
   },
   "arCameraRetry": "Coba lagi",
-  "arCameraDeniedHint": "Kalau dialog izinnya tidak muncul lagi, nyalakan kamera di Setelan › Aplikasi › Constella › Izin."
+  "arCameraDeniedHint": "Kalau dialog izinnya tidak muncul lagi, nyalakan kamera di Setelan › Aplikasi › Constella › Izin.",
+  "focusEntry": "Mulai sesi fokus",
+  "focusEntryHint": "Fokus ditemani langit malam",
+  "tabStars": "Bintang",
+  "starAimHint": "Arahkan bidikan ke bintang",
+  "starSearching": "Membaca langit…",
+  "starNothingHere": "Tidak ada bintang terang di bidikan",
+  "starNothingHereBody": "Gerakkan pelan-pelan. Katalognya hanya memuat bintang sampai magnitudo 5.",
+  "starOffBy": "{deg}° dari tengah",
+  "@starOffBy": {
+    "placeholders": {
+      "deg": {
+        "type": "String"
+      }
+    }
+  },
+  "starMagnitude": "Magnitudo",
+  "starDistance": "Jarak",
+  "starLightYears": "{value} tahun cahaya",
+  "@starLightYears": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "starDistanceUnknown": "Belum diketahui",
+  "starSpectralType": "Tipe spektral",
+  "starConstellation": "Rasi",
+  "starAltitude": "Ketinggian",
+  "starNeedsLocationTitle": "Constella perlu tahu posisimu secara kasar",
+  "starNeedsLocationBody": "Bintang yang ada di atasmu bergantung pada tempatmu berdiri. Lokasi perkiraan sudah cukup — Constella tidak pernah meminta lokasi presisi, dan tidak ada yang disimpan atau dikirim ke mana pun.",
+  "starAllowLocation": "Izinkan lokasi",
+  "starLocationDenied": "Tanpa lokasi, Constella tidak bisa tahu bintang mana yang sedang terbit.",
+  "starLocationServiceOff": "Layanan lokasi di ponsel ini sedang mati.",
+  "starOpenSettings": "Buka setelan",
+  "starNoCompass": "Ponsel ini tidak punya kompas",
+  "starNoCompassBody": "Mengenali bintang butuh magnetometer untuk tahu kamu menghadap ke mana. Perangkat ini tidak melaporkannya.",
+  "starBelowHorizon": "di bawah ufuk"
 }

@@ -292,4 +292,85 @@ class AppL10nEn extends AppL10n {
   @override
   String get arCameraDeniedHint =>
       'If the prompt no longer appears, turn the camera on in Settings › Apps › Constella › Permissions.';
+
+  @override
+  String get focusEntry => 'Start a focus session';
+
+  @override
+  String get focusEntryHint => 'Focus while the cosmos keeps you company';
+
+  @override
+  String get tabStars => 'Stars';
+
+  @override
+  String get starAimHint => 'Point the crosshair at a star';
+
+  @override
+  String get starSearching => 'Reading the sky…';
+
+  @override
+  String get starNothingHere => 'No bright star in the crosshair';
+
+  @override
+  String get starNothingHereBody =>
+      'Move slowly. Only stars down to magnitude 5 are in the catalogue.';
+
+  @override
+  String starOffBy(String deg) {
+    return '$deg° from centre';
+  }
+
+  @override
+  String get starMagnitude => 'Magnitude';
+
+  @override
+  String get starDistance => 'Distance';
+
+  @override
+  String starLightYears(String value) {
+    return '$value light years';
+  }
+
+  @override
+  String get starDistanceUnknown => 'Not known';
+
+  @override
+  String get starSpectralType => 'Spectral type';
+
+  @override
+  String get starConstellation => 'Constellation';
+
+  @override
+  String get starAltitude => 'Altitude';
+
+  @override
+  String get starNeedsLocationTitle => 'Constella needs your rough location';
+
+  @override
+  String get starNeedsLocationBody =>
+      'Which stars are above you depends on where you stand. Approximate location is enough — Constella never asks for precise location, and nothing is stored or sent anywhere.';
+
+  @override
+  String get starAllowLocation => 'Allow location';
+
+  @override
+  String get starLocationDenied =>
+      'Without location, Constella cannot tell which stars are up.';
+
+  @override
+  String get starLocationServiceOff =>
+      'Location is switched off on this phone.';
+
+  @override
+  String get starOpenSettings => 'Open settings';
+
+  @override
+  String get starNoCompass => 'This phone has no compass';
+
+  @override
+  String get starNoCompassBody =>
+      'Identifying a star needs a magnetometer to know which way you are facing. This device does not report one.';
+
+  @override
+  String get starBelowHorizon => 'below the horizon';
 }

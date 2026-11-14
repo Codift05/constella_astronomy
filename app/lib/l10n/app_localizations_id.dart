@@ -289,4 +289,86 @@ class AppL10nId extends AppL10n {
   @override
   String get arCameraDeniedHint =>
       'Kalau dialog izinnya tidak muncul lagi, nyalakan kamera di Setelan › Aplikasi › Constella › Izin.';
+
+  @override
+  String get focusEntry => 'Mulai sesi fokus';
+
+  @override
+  String get focusEntryHint => 'Fokus ditemani langit malam';
+
+  @override
+  String get tabStars => 'Bintang';
+
+  @override
+  String get starAimHint => 'Arahkan bidikan ke bintang';
+
+  @override
+  String get starSearching => 'Membaca langit…';
+
+  @override
+  String get starNothingHere => 'Tidak ada bintang terang di bidikan';
+
+  @override
+  String get starNothingHereBody =>
+      'Gerakkan pelan-pelan. Katalognya hanya memuat bintang sampai magnitudo 5.';
+
+  @override
+  String starOffBy(String deg) {
+    return '$deg° dari tengah';
+  }
+
+  @override
+  String get starMagnitude => 'Magnitudo';
+
+  @override
+  String get starDistance => 'Jarak';
+
+  @override
+  String starLightYears(String value) {
+    return '$value tahun cahaya';
+  }
+
+  @override
+  String get starDistanceUnknown => 'Belum diketahui';
+
+  @override
+  String get starSpectralType => 'Tipe spektral';
+
+  @override
+  String get starConstellation => 'Rasi';
+
+  @override
+  String get starAltitude => 'Ketinggian';
+
+  @override
+  String get starNeedsLocationTitle =>
+      'Constella perlu tahu posisimu secara kasar';
+
+  @override
+  String get starNeedsLocationBody =>
+      'Bintang yang ada di atasmu bergantung pada tempatmu berdiri. Lokasi perkiraan sudah cukup — Constella tidak pernah meminta lokasi presisi, dan tidak ada yang disimpan atau dikirim ke mana pun.';
+
+  @override
+  String get starAllowLocation => 'Izinkan lokasi';
+
+  @override
+  String get starLocationDenied =>
+      'Tanpa lokasi, Constella tidak bisa tahu bintang mana yang sedang terbit.';
+
+  @override
+  String get starLocationServiceOff =>
+      'Layanan lokasi di ponsel ini sedang mati.';
+
+  @override
+  String get starOpenSettings => 'Buka setelan';
+
+  @override
+  String get starNoCompass => 'Ponsel ini tidak punya kompas';
+
+  @override
+  String get starNoCompassBody =>
+      'Mengenali bintang butuh magnetometer untuk tahu kamu menghadap ke mana. Perangkat ini tidak melaporkannya.';
+
+  @override
+  String get starBelowHorizon => 'di bawah ufuk';
 }

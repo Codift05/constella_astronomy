@@ -186,5 +186,43 @@
     }
   },
   "arCameraRetry": "Try again",
-  "arCameraDeniedHint": "If the prompt no longer appears, turn the camera on in Settings › Apps › Constella › Permissions."
+  "arCameraDeniedHint": "If the prompt no longer appears, turn the camera on in Settings › Apps › Constella › Permissions.",
+  "focusEntry": "Start a focus session",
+  "focusEntryHint": "Focus while the cosmos keeps you company",
+  "tabStars": "Stars",
+  "starAimHint": "Point the crosshair at a star",
+  "starSearching": "Reading the sky…",
+  "starNothingHere": "No bright star in the crosshair",
+  "starNothingHereBody": "Move slowly. Only stars down to magnitude 5 are in the catalogue.",
+  "starOffBy": "{deg}° from centre",
+  "@starOffBy": {
+    "placeholders": {
+      "deg": {
+        "type": "String"
+      }
+    }
+  },
+  "starMagnitude": "Magnitude",
+  "starDistance": "Distance",
+  "starLightYears": "{value} light years",
+  "@starLightYears": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "starDistanceUnknown": "Not known",
+  "starSpectralType": "Spectral type",
+  "starConstellation": "Constellation",
+  "starAltitude": "Altitude",
+  "starNeedsLocationTitle": "Constella needs your rough location",
+  "starNeedsLocationBody": "Which stars are above you depends on where you stand. Approximate location is enough — Constella never asks for precise location, and nothing is stored or sent anywhere.",
+  "starAllowLocation": "Allow location",
+  "starLocationDenied": "Without location, Constella cannot tell which stars are up.",
+  "starLocationServiceOff": "Location is switched off on this phone.",
+  "starOpenSettings": "Open settings",
+  "starNoCompass": "This phone has no compass",
+  "starNoCompassBody": "Identifying a star needs a magnetometer to know which way you are facing. This device does not report one.",
+  "starBelowHorizon": "below the horizon"
 }
