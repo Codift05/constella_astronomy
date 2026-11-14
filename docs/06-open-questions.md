@@ -14,3 +14,22 @@ Hal-hal yang belum diputuskan di PRD dan akan memblokir implementasi bila dibiar
 | 6 | Posisi planet dihitung lokal di perangkat atau diambil dari layanan? | 4.1 |
 | 7 | Font pengganti SF Pro Rounded di Android apa, dan apakah lisensinya mengizinkan? | 3.2 |
 | 8 | Dynamic Island memerlukan ActivityKit dan modul Swift terpisah — siapa yang menanganinya? | 4.3 |
+
+## Produk
+
+| # | Pertanyaan |
+|---|---|
+| 9 | ~~Tab "Shop" dan "Goals" ada di navigasi referensi, tetapi tidak ada di PRD.~~ **Diputuskan 13 Nov 2026:** navigasi mengikuti bobot fitur PRD, bukan gambar referensi. Tab menjadi Langit (AR), Rasi, Fokus, Profil. Shop dibuang dari MVP. |
+| 10 | Stardust Energy didapat dari apa saja, dan berapa banyak per aksi? |
+| 11 | Stardust Energy dipakai untuk apa? Tanpa sink, poin tidak punya arti. |
+| 12 | Apa yang terjadi bila sesi fokus dibatalkan di tengah jalan? |
+| 13 | Wilayah target peluncuran pertama di mana? Ini menentukan pilihan API radar. |
+| 14 | Berapa versi iOS dan Android minimum? ARKit sky features membatasi perangkat. |
+
+## Hukum & Privasi
+
+| # | Pertanyaan |
+|---|---|
+| 15 | GPS dan kamera selalu aktif — bagaimana teks permission dan kebijakan privasinya? |
+| 16 | Musik lo-fi: lisensi dari mana? |
+| 17 | Nama "Foku" pada maskot referensi adalah milik produk lain. Maskot Constella perlu nama dan desain sendiri. |
