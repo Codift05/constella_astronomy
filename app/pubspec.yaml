@@ -41,6 +41,7 @@ dependencies:
   sqflite: ^2.4.6
   path: ^1.9.1
   sensors_plus: ^7.1.1
+  geolocator: ^14.1.2
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    # Katalog 1637 bintang sampai magnitudo 5.0, disaring dari HYG Database.
+    # Dibundel, bukan diambil dari jaringan: identifikasi bintang harus jalan
+    # di atap tanpa sinyal, dan jawabannya harus seketika.
+    - assets/stars.csv
   generate: true
 
   # To add assets to your application, add an assets section, like this:

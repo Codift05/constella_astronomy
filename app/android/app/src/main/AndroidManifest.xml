@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Hanya lokasi perkiraan. Untuk mengetahui bintang mana yang
+         sedang terbit, selisih beberapa kilometer tidak berpengaruh:
+         bahkan meleset 50 km hanya menggeser langit sekitar setengah
+         derajat. Lokasi presisi tidak diminta. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
         android:label="constella_app"

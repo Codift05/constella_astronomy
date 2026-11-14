@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Constella uses your approximate location to work out which stars are above you right now. Nothing is stored or sent anywhere.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Constella uses the camera to open the Cosmic Night portal over your surroundings.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
