@@ -1,0 +1,69 @@
+# Membangun .ipa Constella di runner macOS, karena Flutter tidak bisa
+# membangun iOS dari Linux: SDK Linux-nya tidak memuat artefak engine iOS
+# maupun gen_snapshot iOS, dan `flutter build` di sana hanya mengenal
+# apk/appbundle/aar/bundle/linux/web.
+#
+# Hasilnya .ipa TANPA tanda tangan. Penandatanganan dilakukan di mesin Fedora
+# oleh xtool saat memasang:
+#
+#     xtool install constella-unsigned.ipa
+#
+# xtool memakai Apple ID biasa, jadi tidak perlu akun developer berbayar.
+# Catatan: aplikasi yang ditandatangani Apple ID gratis kedaluwarsa setelah
+# 7 hari dan harus dipasang ulang.
+
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'ios-*'
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          # Dikunci ke versi yang dipakai di mesin lokal, supaya hasil CI dan
+          # hasil lokal tidak berbeda diam-diam.
+          flutter-version: '3.44.2'
+          channel: stable
+          cache: true
+
+      - name: Ambil dependensi
+        working-directory: app
+        run: flutter pub get
+
+      - name: Bangun berkas terjemahan
+        working-directory: app
+        run: flutter gen-l10n
+
+
+
+      - name: Bangun Runner.app tanpa tanda tangan
+        working-directory: app
+        run: flutter build ios --release --no-codesign
+
+      - name: Bungkus jadi .ipa
+        working-directory: app
+        run: |
+          set -euo pipefail
+          rm -rf Payload
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry constella-unsigned.ipa Payload
+          rm -rf Payload
+          ls -lh constella-unsigned.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: constella-ios-unsigned
+          path: app/constella-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
