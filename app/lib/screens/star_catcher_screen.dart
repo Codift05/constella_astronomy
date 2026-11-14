@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/l10n_ext.dart';
+import '../sky/caught_stars_store.dart';
 import '../sky/observer_location.dart';
 import '../sky/sky_math.dart';
 import '../sky/sky_orientation.dart';
 import '../sky/star_catalog.dart';
 import '../theme/motion.dart';
+import '../stardust/stardust_rules.dart';
+import '../stardust/stardust_store.dart';
 import '../theme/tokens.dart';
+import '../widgets/catch_celebration.dart';
 import '../widgets/soft_ui.dart';
 
 enum _Camera { loading, ready, denied, unavailable }
@@ -60,6 +64,10 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
 
   SightedStar? _target;
   double _separation = 0;
+
+  /// Bintang yang baru saja ditangkap beserta hadiahnya. Null saat tidak ada
+  /// perayaan yang sedang tampil.
+  ({Star star, int reward, bool isNew})? _celebrating;
 
   @override
   void initState() {
@@ -202,7 +210,8 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
             children: [
               _cameraLayer(),
               const _BottomScrim(),
-              if (_ready) _Crosshair(locked: _target != null),
+              if (_ready && _celebrating == null)
+                _Crosshair(locked: _target != null),
               SafeArea(
                 bottom: false,
                 child: Padding(
@@ -210,25 +219,57 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
                   child: _topBar(),
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpace.md,
-                      0,
-                      AppSpace.md,
-                      kTabBarInset,
+              if (_celebrating == null)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpace.md,
+                        0,
+                        AppSpace.md,
+                        kTabBarInset,
+                      ),
+                      child: _panel(),
                     ),
-                    child: _panel(),
                   ),
                 ),
-              ),
+              if (_celebrating != null)
+                CatchCelebration(
+                  star: _celebrating!.star,
+                  reward: _celebrating!.reward,
+                  isNew: _celebrating!.isNew,
+                  onClose: () => setState(() => _celebrating = null),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Menangkap bintang yang sedang dibidik.
+  ///
+  /// Hadiah hanya diberikan sekali per bintang. Tanpa itu, mengetuk bintang
+  /// yang sama berulang kali jadi cara termudah mengumpulkan Stardust, dan
+  /// koleksinya kehilangan arti.
+  Future<void> _catchTarget() async {
+    final hit = _target;
+    final store = CaughtStarsScope.maybeOf(context);
+    if (hit == null || store == null) return;
+
+    // Scope diambil sebelum await; sesudahnya context bisa sudah tidak sah.
+    final stardust = StardustScope.of(context);
+    HapticFeedback.mediumImpact();
+
+    final outcome = await store.catchStar(hit.star);
+    final isNew = outcome == CatchOutcome.caught;
+    final reward = isNew ? StardustRules.perStarCaught(hit.star.magnitude) : 0;
+    if (isNew) await stardust.awardStarCatch(hit.star.magnitude);
+    if (!mounted) return;
+    setState(
+      () => _celebrating = (star: hit.star, reward: reward, isNew: isNew),
     );
   }
 
@@ -333,6 +374,12 @@ class _StarCatcherScreenState extends State<StarCatcherScreen> {
               key: ValueKey(hit.star.displayName),
               sighted: hit,
               separationDeg: _separation,
+              alreadyCaught:
+                  CaughtStarsScope.maybeOf(
+                    context,
+                  )?.has(hit.star.displayName) ??
+                  false,
+              onCatch: _catchTarget,
             ),
     );
   }
@@ -465,10 +512,18 @@ class _StarCard extends StatelessWidget {
     super.key,
     required this.sighted,
     required this.separationDeg,
+    required this.alreadyCaught,
+    required this.onCatch,
   });
 
   final SightedStar sighted;
   final double separationDeg;
+
+  /// True kalau bintang ini sudah ada di koleksi; tombolnya tetap bisa
+  /// ditekan, tapi tidak memberi Stardust lagi.
+  final bool alreadyCaught;
+
+  final Future<void> Function() onCatch;
 
   @override
   Widget build(BuildContext context) {
@@ -522,6 +577,20 @@ class _StarCard extends StatelessWidget {
             alt >= 0
                 ? '${alt.round()}°'
                 : '${alt.round()}° · ${l10n.starBelowHorizon}',
+          ),
+          const SizedBox(height: AppSpace.md),
+          // Mengarahkan hanya memberi pratinjau; menangkap adalah tindakan
+          // yang disengaja, dan di situlah perayaannya muncul.
+          SizedBox(
+            width: double.infinity,
+            child: PillButton(
+              label: alreadyCaught ? l10n.starAlreadyCaught : l10n.catchStar,
+              color: alreadyCaught ? AppNight.surface : AppNight.accent,
+              labelColor: alreadyCaught
+                  ? AppNight.onSurface
+                  : AppNight.onAccent,
+              onPressed: onCatch,
+            ),
           ),
         ],
       ),
@@ -602,10 +671,9 @@ class _Message extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: AppText.subhead.copyWith(
-                    color: AppNight.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppText.subhead
+                      .withWeight(FontWeight.w600)
+                      .copyWith(color: AppNight.onSurface),
                 ),
               ),
             ],

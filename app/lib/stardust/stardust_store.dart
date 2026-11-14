@@ -56,6 +56,13 @@ class StardustStore extends ChangeNotifier {
   }
 
   /// Hadiah untuk satu rasi bintang yang disimpan.
+  /// Memberi hadiah menangkap satu bintang. Besarannya ditentukan
+  /// [StardustRules.perStarCaught] menurut magnitudo bintangnya.
+  Future<void> awardStarCatch(double magnitude) async {
+    await _award(StardustRules.perStarCaught(magnitude));
+    notifyListeners();
+  }
+
   Future<void> awardConstellation(int lines) async {
     await _award(StardustRules.forConstellation(lines));
     notifyListeners();

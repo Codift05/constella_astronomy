@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'constellations/constellation_store.dart';
+import 'sky/caught_stars_store.dart';
 import 'data/app_database.dart';
 import 'data/app_settings.dart';
 import 'dev/frame_report.dart';
@@ -24,13 +25,20 @@ Future<void> main() async {
   final constellations = ConstellationStore(db);
   final stardust = StardustStore(db);
   final settings = AppSettings(db);
-  await Future.wait([constellations.load(), stardust.load(), settings.load()]);
+  final caughtStars = CaughtStarsStore(db);
+  await Future.wait([
+    constellations.load(),
+    stardust.load(),
+    settings.load(),
+    caughtStars.load(),
+  ]);
 
   runApp(
     ConstellaApp(
       constellations: constellations,
       stardust: stardust,
       settings: settings,
+      caughtStars: caughtStars,
     ),
   );
 }
@@ -41,11 +49,13 @@ class ConstellaApp extends StatelessWidget {
     required this.constellations,
     required this.stardust,
     required this.settings,
+    required this.caughtStars,
   });
 
   final ConstellationStore constellations;
   final StardustStore stardust;
   final AppSettings settings;
+  final CaughtStarsStore caughtStars;
 
   /// Membangun aplikasi dengan database di memori. Dipakai tes widget.
   ///
@@ -63,16 +73,19 @@ class ConstellaApp extends StatelessWidget {
     final constellations = ConstellationStore(db);
     final stardust = StardustStore(db);
     final settings = AppSettings(db);
+    final caughtStars = CaughtStarsStore(db);
     await Future.wait([
       constellations.load(),
       stardust.load(),
       settings.load(),
+      caughtStars.load(),
     ]);
     if (skipOnboarding) await settings.completeOnboarding();
     return ConstellaApp(
       constellations: constellations,
       stardust: stardust,
       settings: settings,
+      caughtStars: caughtStars,
     );
   }
 
@@ -83,32 +96,35 @@ class ConstellaApp extends StatelessWidget {
     // adalah saudaranya, bukan keturunannya, sehingga tidak bisa membacanya.
     return ConstellationScope(
       notifier: constellations,
-      child: StardustScope(
-        notifier: stardust,
-        child: SettingsScope(
-          notifier: settings,
-          // MaterialApp ikut dibangun ulang saat tema berganti, supaya
-          // themeMode yang tersimpan di SQLite langsung terpakai.
-          child: ListenableBuilder(
-            listenable: settings,
-            builder: (context, _) => MaterialApp(
-              onGenerateTitle: (context) => AppL10n.of(context).appTitle,
-              debugShowCheckedModeBanner: false,
-              theme: buildAppTheme(Brightness.light),
-              darkTheme: buildAppTheme(Brightness.dark),
-              themeMode: settings.themeMode,
-              // Warna palet diinterpolasi, jadi perpindahan tema meluncur
-              // alih-alih berkedip. 200 ms linear bawaan terasa patah.
-              themeAnimationDuration: const Duration(milliseconds: 360),
-              themeAnimationCurve: Curves.easeInOutCubic,
-              localizationsDelegates: const [
-                AppL10n.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: AppL10n.supportedLocales,
-              home: const _Root(),
+      child: CaughtStarsScope(
+        notifier: caughtStars,
+        child: StardustScope(
+          notifier: stardust,
+          child: SettingsScope(
+            notifier: settings,
+            // MaterialApp ikut dibangun ulang saat tema berganti, supaya
+            // themeMode yang tersimpan di SQLite langsung terpakai.
+            child: ListenableBuilder(
+              listenable: settings,
+              builder: (context, _) => MaterialApp(
+                onGenerateTitle: (context) => AppL10n.of(context).appTitle,
+                debugShowCheckedModeBanner: false,
+                theme: buildAppTheme(Brightness.light),
+                darkTheme: buildAppTheme(Brightness.dark),
+                themeMode: settings.themeMode,
+                // Warna palet diinterpolasi, jadi perpindahan tema meluncur
+                // alih-alih berkedip. 200 ms linear bawaan terasa patah.
+                themeAnimationDuration: const Duration(milliseconds: 360),
+                themeAnimationCurve: Curves.easeInOutCubic,
+                localizationsDelegates: const [
+                  AppL10n.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppL10n.supportedLocales,
+                home: const _Root(),
+              ),
             ),
           ),
         ),

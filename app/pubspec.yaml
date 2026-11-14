@@ -42,6 +42,7 @@ dependencies:
   path: ^1.9.1
   sensors_plus: ^7.1.1
   geolocator: ^14.1.2
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,16 @@ flutter:
     # Dibundel, bukan diambil dari jaringan: identifikasi bintang harus jalan
     # di atap tanpa sinyal, dan jawabannya harus seketika.
     - assets/stars.csv
+    # Lisensi SIL OFL wajib ikut dibundel bersama fontnya.
+    - assets/fonts/Nunito-OFL.txt
+
+  fonts:
+    # Nunito menjawab open questions #7: SF Pro Rounded hanya ada di iOS,
+    # jadi Android selama ini jatuh ke font sistem dan tampilannya berbeda.
+    # Variable font, satu berkas untuk seluruh rentang bobot.
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito.ttf
   generate: true
 
   # To add assets to your application, add an assets section, like this:

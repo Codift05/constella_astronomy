@@ -15,6 +15,14 @@ abstract final class StardustRules {
   /// Tambahan per garis, supaya bentuk yang lebih kaya lebih dihargai.
   static const perConstellationLine = 5;
 
+  /// Hadiah menangkap satu bintang, menurut magnitudonya.
+  ///
+  /// Bintang redup lebih sulit ditemukan dari kota, jadi nilainya lebih besar.
+  /// Sirius yang paling terang (-1,44) memberi paling sedikit; bintang di
+  /// batas katalog (magnitudo 5) memberi paling banyak.
+  static int perStarCaught(double magnitude) =>
+      (10 + magnitude * 4).round().clamp(5, 40);
+
   /// Jarak antar tingkat pada progress bar melengkung.
   static const tierSize = 500;
 

@@ -10,7 +10,7 @@ import 'package:sqflite/sqflite.dart';
 ///   tidak punya tipe JSONB.
 abstract final class AppDatabase {
   static const fileName = 'constella.db';
-  static const version = 3;
+  static const version = 4;
 
   static Future<Database> open({DatabaseFactory? factory, String? path}) async {
     final db = factory ?? databaseFactory;
@@ -64,12 +64,35 @@ abstract final class AppDatabase {
         theme_mode TEXT NOT NULL DEFAULT 'system'
       )
     ''');
+    await _createCaughtStars(db);
+
     await db.insert('profile', {
       'id': 1,
       'stardust_energy': 0,
       'onboarding_done': 0,
       'theme_mode': 'system',
     });
+  }
+
+  /// Bintang yang sudah ditangkap pengguna.
+  ///
+  /// Kuncinya nama tampilan, jadi satu bintang hanya bisa masuk koleksi
+  /// sekali. Tanpa itu, mengetuk bintang yang sama berulang kali akan jadi
+  /// cara termudah mengumpulkan Stardust, dan koleksinya kehilangan arti.
+  static Future<void> _createCaughtStars(Database db) async {
+    await db.execute('''
+      CREATE TABLE caught_stars (
+        name TEXT PRIMARY KEY,
+        constellation TEXT NOT NULL,
+        magnitude REAL NOT NULL,
+        light_years REAL NOT NULL,
+        caught_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_caught_stars_caught_at '
+      'ON caught_stars (caught_at DESC)',
+    );
   }
 
   static Future<void> _upgrade(Database db, int from, int to) async {
@@ -84,6 +107,9 @@ abstract final class AppDatabase {
         "ALTER TABLE profile ADD COLUMN theme_mode TEXT NOT NULL "
         "DEFAULT 'system'",
       );
+    }
+    if (from < 4) {
+      await _createCaughtStars(db);
     }
   }
 }
