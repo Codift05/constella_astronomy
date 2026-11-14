@@ -35,7 +35,11 @@ class CurvedProgressBar extends StatelessWidget {
       curve: Curves.elasticOut,
       builder: (context, t, _) => SizedBox(
         width: size,
-        height: size * 0.72,
+        // Tinggi ikut membesar sebagian saat Dynamic Type dinaikkan. Tanpa
+        // ini, angka 40 pt di tengah tumbuh melewati kotak bertinggi tetap
+        // dan Column-nya overflow — tidak terlihat selama kartu ini masih di
+        // bawah lipatan layar, karena ListView belum membangunnya.
+        height: size * 0.72 * _growth(context),
         child: RepaintBoundary(
           child: CustomPaint(
             painter: _ArcPainter(
@@ -45,25 +49,40 @@ class CurvedProgressBar extends StatelessWidget {
               gradientEnd: p.accentStrong,
             ),
             child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(label, style: p.numeral.copyWith(fontSize: 40)),
-                  if (caption != null) ...[
-                    const SizedBox(height: AppSpace.xs),
-                    Text(
-                      caption!,
-                      textAlign: TextAlign.center,
-                      style: p.caption,
-                    ),
-                  ],
-                ],
+              // Jaring pengaman terakhir: pada skala teks ekstrem isinya
+              // mengecil proporsional alih-alih melimpah keluar busur.
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: size * 0.14),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(label, style: p.numeral.copyWith(fontSize: 40)),
+                      if (caption != null) ...[
+                        const SizedBox(height: AppSpace.xs),
+                        Text(
+                          caption!,
+                          textAlign: TextAlign.center,
+                          style: p.caption,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  /// Faktor pertumbuhan kotak terhadap skala teks, ditahan di 1,4x supaya
+  /// busurnya tidak ikut melar tak terkendali di layar kecil.
+  double _growth(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    return (1 + (scale - 1) * 0.45).clamp(1.0, 1.4);
   }
 }
 
