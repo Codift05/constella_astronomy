@@ -82,3 +82,60 @@ Acceptance criteria diturunkan dari mekanik yang ditulis di PRD asli. Baris yang
 - [ ] Stardust Energy bertambah setelah sesi selesai, dan progress bar melengkung ikut bergerak dengan spring animation.
 - [ ] Lo-fi player bisa play, pause, dan ganti track; audio tetap jalan saat layar AR aktif. *(turunan)*
 - [ ] Timer tetap akurat saat aplikasi di background. *(turunan)*
+
+---
+
+## 4.5 Star Catcher (Penangkap Bintang)
+
+**Ditambahkan 14 November 2026, di luar PRD awal.** Dicatat terpisah supaya
+jelas bahwa ini permintaan baru, bukan tafsir bebas atas dokumen lama.
+
+**Deskripsi:** Kamera dengan bidikan di tengah layar. Arahkan ke sebuah bintang,
+bidikan mengunci, lalu kartu datanya meluncur masuk.
+
+### Kenapa ini cocok
+
+Prinsip desain nomor satu di [01-product-vision.md](01-product-vision.md)
+berbunyi *"Dunia nyata adalah kanvas."* Fitur ini mengambil bintang yang
+benar-benar ada di atas pengguna dan memberinya nama. Visi produk juga sudah
+menempatkan Constella sebagai *stargazing app* — "tetapi tidak berhenti di data
+astronomi". Penangkap bintang mengisi sisi itu tanpa menggeser inti AR-nya.
+
+### Mekanik & UI
+- Bidikan melingkar di tengah layar kamera, berubah warna dan mengecil saat
+  mengunci sebuah bintang, disertai haptic ringan.
+- Pembacaan kompas kecil di atas layar: arah mata angin, azimut, dan ketinggian.
+- Kartu kaca di bawah: nama bintang, rasi, jarak dalam tahun cahaya, magnitudo,
+  tipe spektral, dan ketinggiannya di atas ufuk.
+- Jarak sudut dari titik bidik ditampilkan, supaya pengguna tahu seberapa tepat
+  bidikannya.
+
+### Dari mana datanya
+
+**Bukan dari API NASA.** Tidak ada layanan NASA yang bisa ditanya "bintang apa
+yang sedang saya tunjuk" — identifikasi bintang memakai katalog statis. Constella
+membundel 1.637 bintang sampai magnitudo 5,0, disaring dari
+[HYG Database](https://github.com/astronexus/HYG-Database) yang berbasis
+Hipparcos, Yale Bright Star, dan Gliese. Ukurannya 69 KB.
+
+Dibundel, bukan diambil dari jaringan, karena fitur ini dipakai di atap pada
+malam hari: sinyal sering buruk dan jawabannya harus seketika.
+
+### Acceptance Criteria
+- [x] Bidikan di tengah layar kamera mengunci bintang terdekat dari arah bidik.
+- [x] Kartu data muncul dengan transisi meluncur, bukan berkedip.
+- [x] Nama, rasi, jarak, magnitudo, dan tipe spektral ditampilkan.
+- [x] Seluruhnya bekerja tanpa jaringan.
+- [x] Izin yang diminta hanya lokasi **perkiraan**, bukan presisi.
+- [x] Perangkat tanpa magnetometer mendapat penjelasan, bukan layar kosong.
+- [ ] Penanda posisi bintang digambar di layar, bukan hanya jarak sudutnya.
+- [ ] Planet ikut dikenali, bukan hanya bintang.
+
+### Batas yang diketahui
+
+| Batas | Akibatnya |
+|---|---|
+| Utara magnetik, bukan utara sejati | Deklinasi magnetik belum dikoreksi. Di Indonesia selisihnya sekitar 1 derajat sehingga tak terasa; di sebagian Amerika Utara bisa belasan derajat |
+| Ketelitian kompas ponsel | Magnetometer ponsel mudah terganggu logam dan speaker. Bidikan meleset beberapa derajat adalah hal biasa |
+| Presesi diabaikan | Katalog berpatokan J2000; pergeserannya sekitar 0,4 derajat untuk 2026, jauh di bawah derau kompas |
+| Hanya bintang | Planet bergerak terhadap bintang, jadi perlu perhitungan terpisah yang belum dibangun |

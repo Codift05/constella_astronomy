@@ -39,7 +39,7 @@ Operasi CRUD sederhana (profil, sesi fokus, konstelasi) boleh langsung dari Flut
 
 | Paket | Versi | Untuk apa |
 |---|---|---|
-| `sensors_plus` | ^7.1.1 | Akselerometer, dipakai menghitung sudut elevasi kamera sehingga langit malam hanya mengganti bagian di atas cakrawala. Bukan pengganti ARKit/ARCore: ia tidak mengenal arah mata angin |
+| `geolocator` | ^14.1.2 | Lokasi **perkiraan** pengamat, yang menentukan bintang mana sedang terbit. Akurasi rendah diminta dengan sengaja: meleset 50 km hanya menggeser langit setengah derajat, dan izinnya jadi "lokasi perkiraan", bukan presisi |
+| `sensors_plus` | ^7.1.1 | Akselerometer **dan magnetometer**. Akselerometer menghitung sudut elevasi kamera sehingga langit malam hanya mengganti bagian di atas cakrawala. Bukan pengganti ARKit/ARCore: ia tidak mengenal arah mata angin |
 
-`camera`, `sqflite`, `path`, dan `intl` tetap seperti sebelumnya. Belum ada paket audio, geolokasi,
-maupun jaringan — ketiganya menunggu keputusan di [06-open-questions.md](06-open-questions.md).
+`camera`, `sqflite`, `path`, dan `intl` tetap seperti sebelumnya. Belum ada paket audio maupun jaringan — keduanya menunggu keputusan di [06-open-questions.md](06-open-questions.md).

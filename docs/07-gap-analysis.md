@@ -269,3 +269,67 @@ Tangkapan layarnya ada di [screenshots/](screenshots/) nomor 06 sampai 09.
 **Pengujian:** 23 tes baru di `sky_attitude_test.dart` — matematika elevasi (termasuk jatuh bebas dan
 sudut ekstrem), monotonitas `horizonY`, serta perilaku pelicin, ambang derau, tenggat sensor, dan
 langganan ganda. Total **130 tes lolos**, `flutter analyze` bersih.
+
+---
+
+## 7.9 Penangkap bintang dan pelurusan navigasi — 14 November 2026 malam
+
+Dua pekerjaan setelah pengujian pertama di ponsel sungguhan.
+
+### Fokus turun dari navbar
+
+Pengguna bertanya kenapa ada fitur fokus, dan pertanyaan itu sah: Fokus berdiri
+sebagai tab setara, sehingga terbaca seperti aplikasi timer belajar yang nyempil
+di aplikasi astronomi.
+
+Fiturnya sendiri **ada di PRD** — [01-product-vision.md](01-product-vision.md)
+menempatkan Constella di persimpangan tiga kategori, salah satunya *"Focus /
+mindfulness app — tetapi hadiahnya adalah eksplorasi dunia nyata"*, dan
+[§4.4](04-features-mvp.md) menyebut *"Tombol 'Start focus session' memulai timer
+dan masuk ke mode Malam Kosmik"*.
+
+Yang salah adalah penempatannya, dan itu kesalahan implementasi, bukan
+kesalahan PRD. Sekarang navbar berisi **Langit, Bintang, Rasi**, dan sesi fokus
+menjadi pintu kedua menuju portal yang sama dari layar Langit.
+
+### Penangkap bintang (fitur baru, §4.5)
+
+Lihat [04-features-mvp.md §4.5](04-features-mvp.md) untuk rinciannya.
+
+| Bagian | Isi |
+|---|---|
+| Katalog | 1.637 bintang sampai magnitudo 5,0 dari HYG Database, 69 KB, dibundel |
+| Matematika | Hari Julian, waktu sideris, ekuatorial ke horizontal, jarak sudut |
+| Orientasi | Kompas terkompensasi kemiringan dari akselerometer dan magnetometer |
+| Lokasi | `geolocator`, akurasi rendah, izin **lokasi perkiraan** saja |
+| Pencocokan | Bintang terdekat dari arah bidik, dengan bobot keterangan |
+
+**Yang berhasil dibuktikan di emulator:** pembacaan kompas menunjukkan `N 0° 23°`
+persis sesuai nilai akselerometer dan magnetometer yang disuntikkan. Matematika
+orientasinya benar di perangkat, bukan hanya di tes.
+
+**Yang tidak bisa dibuktikan di emulator:** GPS AVD ini mati total —
+`dumpsys location` melaporkan `last location=null` bahkan di tingkat sistem,
+sehingga tidak ada aplikasi yang bisa mendapat posisi di sana. Jalur gagalnya
+justru terbukti bekerja: pesan jelas plus tombol coba lagi, bukan layar kosong.
+Identifikasi bintangnya dibuktikan lewat tes widget yang menyuntikkan posisi dan
+arah bidik yang diketahui.
+
+### Dua bug yang tertangkap, keduanya oleh tes
+
+1. **Kompas membeku saat langit kosong.** `_match` keluar lebih awal tanpa
+   membangun ulang, jadi pembacaan arah di atas layar berhenti di angka lama
+   padahal ponsel digerakkan. Ditemukan saat tes widget pertama kali gagal.
+2. **`CurvedProgressBar` meluap pada teks 200 persen.** Kotaknya bertinggi
+   tetap sementara angka di tengahnya ikut membesar mengikuti Dynamic Type.
+   Bug ini **sudah lama ada** tapi tidak pernah terlihat: kartu Stardust berada
+   di bawah lipatan layar, dan `ListView` tidak pernah membangunnya. Baru muncul
+   ketika tes menggulir ke bawah untuk meraih tombol sesi fokus.
+
+### Penambahan dependensi
+
+`geolocator: ^14.1.2`. Build Android dan paketnya diuji sebelum kode fiturnya
+ditulis, supaya kalau gagal bisa dicabut tanpa membuang pekerjaan.
+
+**Pengujian:** 182 tes lolos — 30 matematika langit, 15 katalog, 7 layar
+penangkap bintang, sisanya yang sudah ada. `flutter analyze` bersih.
