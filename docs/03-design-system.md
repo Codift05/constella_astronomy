@@ -102,3 +102,41 @@ Tidak ada sudut kaku.
 | Curved Progress Bar | Indikator Stardust Energy — busur 240 derajat, terbuka di bawah |
 | Bottom Tab Bar | Langit (AR), Rasi, Fokus |
 | Mini Audio Player | Lo-fi player di atas Home Indicator |
+
+## 3.4 Interactions
+
+### Haptic Feedback
+Taptic Engine aktif pada setiap interaksi:
+
+| Aksi | Jenis getaran |
+|---|---|
+| Menarik garis antar node rasi bintang | Ringan, berulang saat node tersambung |
+| Menekan tombol kapsul | Medium impact |
+| Interaksi maskot | Ringan |
+| Portal terbuka penuh | Berat, sekali |
+
+### Spring Animations
+Seluruh transisi UI — buka portal, pop-up, scroll — wajib memakai spring physics. Tidak ada kurva linear.
+
+| Transisi | Karakter |
+|---|---|
+| Buka portal AR | Lambat, overshoot terlihat, megah |
+| Pop-up / bottom sheet | Cepat, overshoot kecil |
+| Press tombol | Sangat cepat, scale turun lalu kembali |
+
+## 3.5 Aturan Yang Tidak Boleh Dilanggar
+
+1. Tidak ada sudut 90 derajat pada permukaan apa pun.
+2. Tidak ada transisi linear yang terlihat pengguna.
+3. Setiap interaksi membalas dengan gerakan atau haptic sebelum membalas dengan teks.
+4. Teks di atas frosted glass harus tetap lolos kontras WCAG AA — blur bukan pengganti kontras.
+5. Satu tombol Navy per layar.
+
+## 3.6 Catatan Koreksi
+
+**14 November 2026.** Dua baris di dokumen ini sempat mencantumkan "kategori fokus"
+(Study / Work / Creative / Reading) sebagai komponen. Itu keliru: kategori tersebut berasal
+dari gambar referensi Foku, bukan dari PRD. Baris itu sudah dihapus beserta kodenya.
+
+Pelajarannya: gambar referensi menentukan **rupa**, PRD menentukan **fungsi**. Jangan menaikkan
+elemen dari gambar menjadi spesifikasi.
