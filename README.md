@@ -4,8 +4,9 @@ Aplikasi eksplorasi Augmented Reality yang menggabungkan lanskap tata surya deng
 
 - **Platform:** Mobile (iOS & Android)
 - **Stack:** Flutter (frontend) + Golang (backend) + Supabase/PostgreSQL
-- **Design System:** Spatial Soft UI — Playful Modern Minimalism di atas standar Apple HIG
-- **Status:** Slice pertama jalan — design system + Home + Focus Session. Fitur AR belum (lihat `docs/06-open-questions.md`)
+- **Design System:** Spatial Soft UI — Playful Modern Minimalism di atas standar Apple HIG, palet teal-mint dengan putih dominan
+- **Status:** Berjalan di perangkat. Malam Kosmik menunjukkan langit yang benar-benar ada di atas pengamat, penangkap bintang menamai bintang yang dibidik, rasi kota bisa digambar, dan potret kosmik bisa dibagikan. Yang belum: posisi planet, garis rasi, dan world tracking AR sungguhan — lihat [`docs/07-gap-analysis.md`](docs/07-gap-analysis.md)
+- **Pengujian:** 261 tes, `flutter analyze` bersih, 40 pemeriksaan kontras WCAG di kedua tema
 
 ## Struktur Folder
 
@@ -24,7 +25,8 @@ constella/
 │   └── 07-gap-analysis.md       # PRD vs kode: 27 kriteria, status tiap satunya
 └── references/
     ├── README.md                # Catatan tiap file referensi
-    └── ref-01-foku-soft-ui-mascot.png
+    ├── ref-01-foku-soft-ui-mascot.png
+    └── ref-02-eco-camping-illustrated-cards.png
 ```
 
 ## Baca Mulai Dari Mana
